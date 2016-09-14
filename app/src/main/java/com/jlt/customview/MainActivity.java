@@ -21,8 +21,14 @@
 
 package com.jlt.customview;
 
+import android.databinding.DataBindingUtil;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+
+import com.jlt.customview.databinding.ActivityMainBinding;
+import com.jlt.customview.view.MyView;
 
 /** The main activity */
 // begin activity MainActivity
@@ -36,6 +42,14 @@ public class MainActivity extends AppCompatActivity {
 
     /* VARIABLES */
 
+    /* Activity Main Bindings */
+
+    private ActivityMainBinding binding; // ditto
+
+    /* My Views */
+
+    private MyView mMyView; // ditto
+
     /* METHODS */
 
     /* Getters and Setters */
@@ -47,12 +61,38 @@ public class MainActivity extends AppCompatActivity {
     public void onCreate( Bundle savedInstanceState ) {
 
         // 0. super things
+        // 1. use the main layout
+
+        // 0. super things
 
         super.onCreate( savedInstanceState );
 
-        setContentView( R.layout.activity_main );
+        // 1. use the main layout
+
+        binding = DataBindingUtil.setContentView( this, R.layout.activity_main );
 
     } // end onCreate
+
+    // begin method buttonTapped
+    public void buttonTapped( View view ) {
+
+        // 0. change circle color
+        // 1. change label color
+        // 2. change label text
+
+        // 0. change circle color
+
+        binding.amMvCustomView.setCircleColor( Color.GREEN );
+
+        // 1. change label color
+
+        binding.amMvCustomView.setLabelColor( Color.MAGENTA );
+
+        // 2. change label text
+
+        binding.amMvCustomView.setCircleText( getResources().getString( R.string.help ) );
+
+    } // end method buttonTapped
 
     /* Other Methods */
 

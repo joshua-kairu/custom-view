@@ -25,7 +25,8 @@
 
 <!-- the main layout -->
 
-<RelativeLayout
+
+<layout
 
     xmlns:android="http://schemas.android.com/apk/res/android"
 
@@ -33,30 +34,55 @@
 
     xmlns:tools="http://schemas.android.com/tools"
 
-    android:layout_width="match_parent"
-
-    android:layout_height="match_parent"
-
-    android:padding="@dimen/layout_padding"
-
-    tools:context="com.jlt.customview.MainActivity"
-
     >
 
-    <com.jlt.customview.view.MyView
+    <RelativeLayout
 
         android:layout_width="match_parent"
 
         android:layout_height="match_parent"
 
-        android:id="@+id/am_mv"
+        android:padding="@dimen/layout_padding"
 
-        custom:circleColor="@color/colorPrimary"
+        tools:context="com.jlt.customview.MainActivity"
 
-        custom:circleLabel="@string/hello_world"
+        >
 
-        custom:labelColor="@color/colorAccent"
+        <!-- the custom view -->
 
-        />
+        <com.jlt.customview.view.MyView
 
-</RelativeLayout>
+            android:layout_width="match_parent"
+
+            android:layout_height="match_parent"
+
+            android:id="@+id/am_mv_custom_view"
+
+            custom:circleColor="@color/colorPrimary"
+
+            custom:circleLabel="@string/hello_world"
+
+            custom:labelColor="@color/colorAccent"
+
+            />
+
+        <!-- Button for changing view attributes -->
+
+        <Button
+
+            android:layout_width="wrap_content"
+
+            android:layout_height="wrap_content"
+
+            android:layout_centerHorizontal="true"
+
+            android:onClick="buttonTapped"
+
+            android:text="@string/button_label"
+
+            />
+
+    </RelativeLayout>
+
+</layout>
+

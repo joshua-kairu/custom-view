@@ -28,4 +28,8 @@
 
     <string name="hello_world">Hello World</string>
 
+    <string name="button_label">Change View Attributes</string>
+
+    <string name="help">Help!</string>
+
 </resources>
