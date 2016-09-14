@@ -109,7 +109,73 @@ public class MyView extends View {
     /* METHODS */
     
     /* Getters and Setters */
-    
+
+    // getter for the circle color
+    public int getCircleColor() {
+        return mCircleColor;
+    }
+
+    // setter for the circle color
+    public void setCircleColor( int circleColor ) {
+
+        // 0. update the member variable
+        // 1. redraw the view
+
+        // 0. update the member variable
+
+        this.mCircleColor = circleColor;
+
+        // 1. redraw the view
+
+        invalidate();
+        requestLayout();
+
+    }
+
+    // getter for the label color
+    public int getLabelColor() {
+        return mLabelColor;
+    }
+
+    // setter for the label color
+    public void setLabelColor( int labelColor ) {
+
+        // 0. update the member variable
+        // 1. redraw the view
+
+        // 0. update the member variable
+
+        this.mLabelColor = labelColor;
+
+        // 1. redraw the view
+
+        invalidate();
+        requestLayout();
+
+    }
+
+    // getter for the circle text
+    public String getCircleText() {
+        return mCircleText;
+    }
+
+    // setter for the circle text
+    public void setCircleText( String circleText ) {
+
+        // 0. update the member variable
+        // 1. redraw the view
+
+        // 0. update the member variable
+
+        this.mCircleText = circleText;
+
+        // 1. redraw the view
+
+        invalidate();
+        requestLayout();
+
+    }
+
     /* Overrides */
 
 //    @Override
