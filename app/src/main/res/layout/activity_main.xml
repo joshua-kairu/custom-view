@@ -29,6 +29,8 @@
 
     xmlns:android="http://schemas.android.com/apk/res/android"
 
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+
     xmlns:tools="http://schemas.android.com/tools"
 
     android:layout_width="match_parent"
@@ -41,9 +43,20 @@
 
     >
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!" />
+    <com.jlt.customview.view.MyView
+
+        android:layout_width="match_parent"
+
+        android:layout_height="match_parent"
+
+        android:id="@+id/am_mv"
+
+        custom:circleColor="@color/colorPrimary"
+
+        custom:circleLabel="@string/hello_world"
+
+        custom:labelColor="@color/colorAccent"
+
+        />
 
 </RelativeLayout>
