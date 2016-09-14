@@ -23,19 +23,26 @@
 
  -->
 
-<!-- attributes for the view -->
+<!-- attributes for the wind direction and speed view -->
 
 <resources>
 
-    <declare-styleable name="MyView">
+    <declare-styleable name="WindDirectionSpeedView">
 
-        <attr name="circleColor" format="color" />
+        <attr name="outerCircleColor" format="color" />
 
-        <attr name="circleLabel" format="string" />
+        <attr name="innerCircleColor" format="color" />
 
-        <attr name="labelColor" format="color" />
+        <attr name="northIndicatorColor" format="color" />
+
+        <attr name="northIndicatorText" format="string" />
+
+        <attr name="arrowColor" format="color" />
+
+        <attr name="arrowAngle" format="float" />
+
+        <attr name="radiusDifference" format="dimension" />
 
     </declare-styleable>
-
 
 </resources>

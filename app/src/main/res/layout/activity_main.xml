@@ -50,19 +50,11 @@
 
         <!-- the custom view -->
 
-        <com.jlt.customview.view.MyView
+        <com.jlt.customview.view.WindDirectionSpeedView
 
             android:layout_width="match_parent"
 
             android:layout_height="match_parent"
-
-            android:id="@+id/am_mv_custom_view"
-
-            custom:circleColor="@color/colorPrimary"
-
-            custom:circleLabel="@string/hello_world"
-
-            custom:labelColor="@color/colorAccent"
 
             />
 

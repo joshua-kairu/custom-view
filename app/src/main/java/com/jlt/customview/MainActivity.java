@@ -3,7 +3,7 @@
 
     Simple Android app to show the use of a custom view.
 
-    Copyright(C)2016Kairu Joshua Wambugu
+    Copyright(C) 2016 Kairu Joshua Wambugu
 
     This program is free software:you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,13 +22,11 @@
 package com.jlt.customview;
 
 import android.databinding.DataBindingUtil;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.jlt.customview.databinding.ActivityMainBinding;
-import com.jlt.customview.view.MyView;
 
 /** The main activity */
 // begin activity MainActivity
@@ -48,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
 
     /* My Views */
 
-    private MyView mMyView; // ditto
+//    private MyView mMyView; // ditto
 
     /* METHODS */
 
@@ -82,15 +80,15 @@ public class MainActivity extends AppCompatActivity {
 
         // 0. change circle color
 
-        binding.amMvCustomView.setCircleColor( Color.GREEN );
+//        binding.amMvCustomView.setCircleColor( Color.GREEN );
 
         // 1. change label color
 
-        binding.amMvCustomView.setLabelColor( Color.MAGENTA );
+//        binding.amMvCustomView.setLabelColor( Color.MAGENTA );
 
         // 2. change label text
 
-        binding.amMvCustomView.setCircleText( getResources().getString( R.string.help ) );
+//        binding.amMvCustomView.setCircleText( getResources().getString( R.string.help ) );
 
     } // end method buttonTapped
 
