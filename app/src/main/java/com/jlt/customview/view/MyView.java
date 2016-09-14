@@ -112,26 +112,94 @@ public class MyView extends View {
     
     /* Overrides */
 
-    @Override
-    // begin onMeasure
-    protected void onMeasure( int widthMeasureSpec, int heightMeasureSpec ) {
-
-        super.onMeasure( widthMeasureSpec, heightMeasureSpec );
-
-    } // end onMeasure
-
-    @Override
-    // called during layout when the size of this view has changed.
-    // begin onSizeChanged
-    protected void onSizeChanged( int w, int h, int oldw, int oldh ) {
-        super.onSizeChanged( w, h, oldw, oldh );
-    } // end onSizeChanged
+//    @Override
+//    // begin onMeasure
+//    protected void onMeasure( int widthMeasureSpec, int heightMeasureSpec ) {
+//
+//        super.onMeasure( widthMeasureSpec, heightMeasureSpec );
+//
+//    } // end onMeasure
+//
+//    @Override
+//    // called during layout when the size of this view has changed.
+//    // begin onSizeChanged
+//    protected void onSizeChanged( int w, int h, int oldw, int oldh ) {
+//        super.onSizeChanged( w, h, oldw, oldh );
+//    } // end onSizeChanged
 
     @Override
     // does the drawing.
     // begin onDraw
     protected void onDraw( Canvas canvas ) {
-        super.onDraw( canvas );
+
+//        super.onDraw( canvas );
+
+        // 0. get half of width and height
+        // 1. calculate the radius based on whichever of the lengths is smaller
+        // 1a. put some padding on the radius
+        // 2. draw the circle
+        // 2a. we want a fill
+        // 2b. use anti aliasing
+        // 2c. use the color specified from XML
+        // 2d. draw!
+        // 3. draw the text
+        // 3a. should have the label color
+        // 3b. should be center aligned
+        // 3c. some text size
+        // 3d. draw!
+
+        // 0. get half of width and height
+
+        int viewWidthHalf = this.getMeasuredWidth() / 2;
+        int viewHeightHalf = this.getMeasuredHeight() / 2;
+
+        // 1. calculate the radius based on whichever of the lengths is smaller
+
+        int radius = -1;
+
+        if ( viewWidthHalf > viewHeightHalf ) { radius = viewHeightHalf; }
+        else if ( viewHeightHalf > viewWidthHalf ) { radius = viewWidthHalf; }
+
+        // 1a. put some padding on the radius
+
+        radius -= getContext().getResources().getInteger( R.integer.radius_padding );
+
+        // 2. draw the circle
+
+        // 2a. we want a fill
+
+        mCirclePaint.setStyle( Paint.Style.FILL );
+
+        // 2b. use anti aliasing
+
+        mCirclePaint.setAntiAlias( true );
+
+        // 2c. use the color specified from XML
+
+        mCirclePaint.setColor( mCircleColor );
+
+        // 2d. draw!
+
+        canvas.drawCircle( viewWidthHalf, viewHeightHalf, radius, mCirclePaint );
+
+        // 3. draw the text
+
+        // 3a. should have the label color
+
+        mCirclePaint.setColor( mLabelColor );
+
+        // 3b. should be center aligned
+
+        mCirclePaint.setTextAlign( Paint.Align.CENTER );
+
+        // 3c. some text size
+
+        mCirclePaint.setTextSize( getContext().getResources().getDimension( R.dimen.text_size ) );
+
+        // 3d. draw!
+
+        canvas.drawText( mCircleText, viewWidthHalf, viewHeightHalf, mCirclePaint );
+
     } // end onDraw
 
     /* Other Methods */

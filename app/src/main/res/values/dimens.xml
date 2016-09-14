@@ -114,4 +114,6 @@
 
     <!-- OTHERS -->
 
+    <dimen name="text_size">24sp</dimen>
+
 </resources>    
