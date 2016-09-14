@@ -22,9 +22,13 @@
 package com.jlt.customview.view;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
+
+import com.jlt.customview.R;
 
 /**
  * A simple custom {@link android.view.View}.
@@ -39,7 +43,20 @@ public class MyView extends View {
     /* Strings */
         
     /* VARIABLES */
-    
+
+    /* Paints */
+
+    private Paint mCirclePaint; // paint for drawing this custom view
+
+    /* Primitives */
+
+    private int mCircleColor; // ditto
+    private int mLabelColor; // ditto
+
+    /* Strings */
+
+    private String mCircleText; // ditto
+
     /* CONSTRUCTOR */
 
     // default super constructors
@@ -48,9 +65,42 @@ public class MyView extends View {
         super( context, attrs, defStyleAttr );
     }
 
+    /** Constructor that is called when inflating a view from XML. */
+    // begin constructor for XML
     public MyView( Context context, AttributeSet attrs ) {
+
+        // 0. super stuff
+        // 1. instantiate the paint
+        // 2. retrieve attributes set in the XML
+
+        // 0. super stuff
+
         super( context, attrs );
-    }
+
+        // 1. instantiate the paint
+
+        mCirclePaint = new Paint();
+
+        // 2. retrieve attributes set in the XML
+
+        // obtainStyledAttributes
+        //  - Returns a TypedArray holding the attribute values
+        //    in the specified AttributeSet (in this case attrs)
+        //    that are listed in array of desired attributes (in this case R.styleable.MyView).
+        TypedArray a = context.getTheme().obtainStyledAttributes( attrs, R.styleable.MyView, 0, 0 );
+
+        // begin try to initialize the member variables from names in the attrs.xml
+        try {
+
+            mCircleText = a.getString( R.styleable.MyView_circleLabel );
+            mCircleColor = a.getInteger( R.styleable.MyView_circleColor, 0 ); // get the color, or 0
+            mLabelColor = a.getInteger( R.styleable.MyView_labelColor, 0 );
+
+        } // end try to initialize the member variables from names in the attrs.xml
+
+        finally { a.recycle(); /* so we can never use a again */ }
+
+    } // end constructor for XML
 
     public MyView( Context context ) {
         super( context );
