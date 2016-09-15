@@ -296,7 +296,8 @@ public class WindDirectionSpeedView extends View {
         // 4c. should be on the middle of the circle
         // 4d. should use the right color
         // 4e. should use the right boldness
-        // 4e. should be drawn
+        // 4f. should be drawn
+
 
         // 0. super stuff
 
@@ -370,9 +371,11 @@ public class WindDirectionSpeedView extends View {
 
         mNorthIndicatorPaint.setStyle( Paint.Style.STROKE );
 
+        // 4e. should use the right boldness
+
         mNorthIndicatorPaint.setStrokeWidth( mNorthIndicatorStrokeWidth );
 
-        // 4e. should be drawn
+        // 4f. should be drawn
 
         canvas.drawText( mNorthIndicatorText, northIndicatorX, northIndicatorY, mNorthIndicatorPaint );
 
@@ -385,7 +388,7 @@ public class WindDirectionSpeedView extends View {
      *
      * @param dp    The integer dp value.
      *
-     * @returns A float representing the pixel value of the passed in dp.
+     * @returns     A float representing the pixel value of the passed in dp.
      * */
     // method dpToPx
     private float dpToPx( int dp ) {
