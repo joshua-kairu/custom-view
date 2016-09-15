@@ -25,6 +25,8 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.RectF;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.View;
@@ -57,6 +59,11 @@ public class WindDirectionSpeedView extends View {
 
     private Paint mCirclePaint; // ditto
     private Paint mNorthIndicatorPaint; // ditto
+    private Paint mArrowPaint; // ditto
+
+    /* Paths */
+
+    private Path mArrowPath; // ditto
 
     /* Primitives */
 
@@ -68,6 +75,10 @@ public class WindDirectionSpeedView extends View {
     private float mArrowAngle; // ditto
     private float mRadiusDifference; // ditto
     private float mNorthIndicatorStrokeWidth; // ditto
+
+    /* RectFs */
+
+    private RectF mArrowBottomArcRectF; // rectangle to hold the arc used in the arrow
 
     /* Strings */
 
@@ -83,14 +94,18 @@ public class WindDirectionSpeedView extends View {
     public WindDirectionSpeedView( Context context, AttributeSet attrs ) {
 
         // 0. super stuff
-        // 1. initialize paints
-        // 2. initialize member variables from the XML
+        // 1. initialize things
+        // 1a. paints
+        // 1b. paths
+        // 1c. rectangles
+        // 3. initialize member variables from the XML
 
         // 0. super stuff
 
         super( context, attrs );
 
-        // 1. initialize paint
+        // 1. initialize things
+        // 1a. paints
 
         mCirclePaint = new Paint();
 
@@ -98,7 +113,17 @@ public class WindDirectionSpeedView extends View {
 
         mNorthIndicatorPaint = new Paint();
 
-        // 2. initialize member variables from the XML
+        mArrowPaint = new Paint();
+
+        // 1b. paths
+
+        mArrowPath = new Path();
+
+        // 1c. rectangles
+
+        mArrowBottomArcRectF = new RectF();
+
+        // 3. initialize member variables from the XML
 
         TypedArray a = context.getTheme().obtainStyledAttributes(
                 attrs, R.styleable.WindDirectionSpeedView, 0, 0
@@ -297,7 +322,13 @@ public class WindDirectionSpeedView extends View {
         // 4d. should use the right color
         // 4e. should use the right boldness
         // 4f. should be drawn
-
+        // 5. draw the arrow facing the north indicator
+        // 5a. draw point A facing the indicator
+        // 5b. draw point B to the left of A
+        // 5c. draw point C to the right of A and B
+        // 5d. join the points
+        // 5e. color the arrow
+        // 5last. draw the arrow
 
         // 0. super stuff
 
@@ -379,6 +410,46 @@ public class WindDirectionSpeedView extends View {
 
         canvas.drawText( mNorthIndicatorText, northIndicatorX, northIndicatorY, mNorthIndicatorPaint );
 
+        // 5. draw the arrow facing the north indicator
+
+        // 5a. draw point A facing the indicator
+
+        float aX = getOriginX( outerRadius ) + mRadiusDifference + innerRadius,
+              aY = getOriginY( outerRadius ) + mRadiusDifference + dpToPx( NORTH_INDICATOR_VERTICAL_PADDING_DP );
+
+        // 5b. draw point B to the left of A
+
+        float bX = getOriginX( outerRadius ) + mRadiusDifference + innerRadius - mRadiusDifference,
+              bY = getOriginY( outerRadius ) + mRadiusDifference + innerRadius + northIndicatorHeight;
+
+        // 5c. draw point C to the right of A and B
+
+        float cX = bX + ( mRadiusDifference * 2 ), cY = bY;
+
+        // 5d. join the points
+
+        mArrowPath.moveTo( aX, aY );
+        mArrowPath.lineTo( bX, bY );
+        mArrowBottomArcRectF.left = bX;
+        mArrowBottomArcRectF.top = bY - northIndicatorHeight;
+        mArrowBottomArcRectF.right = cX;
+        mArrowBottomArcRectF.bottom = cY + northIndicatorHeight;
+
+        // 0 starts at right
+        // -180 starts at left
+        mArrowPath.arcTo( mArrowBottomArcRectF, -180f, 180f );
+
+        mArrowPath.close();
+
+        // 5e. color the arrow
+
+        mArrowPaint.setColor( mArrowColor );
+        mArrowPaint.setStyle( Paint.Style.FILL );
+
+        // 5last. draw the arrow
+
+        canvas.drawPath( mArrowPath, mArrowPaint );
+
     } // end onDraw
 
     /* Other Methods */
@@ -418,6 +489,97 @@ public class WindDirectionSpeedView extends View {
         return ( totalWidth < totalHeight ) ? totalWidth : totalHeight;
 
     } // end method getSmallerLength
+
+    /**
+     * Gets the point we will use as the horizontal origin.
+     *
+     * @param outerCircleRadius The radius of the outer circle,
+     *                          needed to find the origin when the width of the screen
+     *                          is larger than screen height.
+     *
+     * @return The horizontal, or X, origin.
+     * */
+    // begin method getOriginX
+    private float getOriginX( float outerCircleRadius ) {
+
+        // 0. if the width is larger
+        // 0a. origin is left padding + (total width)/2 - outer radius
+        // 1. otherwise
+        // 1a. origin is left padding
+
+        // 0. if the width is larger
+        // 0a. origin is left padding + (total width)/2 - outer radius
+
+        if ( isWidthLarger() == true ) {
+            return getPaddingLeft() + getTotalWidth() / 2 - outerCircleRadius;
+        }
+
+        // 1. otherwise
+        // 1a. origin is left padding
+
+        else { return getPaddingLeft(); }
+
+    } // end method getOriginX
+
+    /**
+     * Gets the point we will use as the vertical origin.
+     *
+     * @param outerCircleRadius The radius of the outer circle,
+     *                          needed to find the origin when the height of the screen
+     *                          is larger than screen width.
+     *
+     * @return The vertical, or Y, origin - mostly the top padding.
+     * */
+    // method getOriginY
+    private float getOriginY( float outerCircleRadius ) {
+
+        // 0. if the height is larger
+        // 0a. origin is top padding + (total height)/2 - outer radius
+        // 1. otherwise
+        // 1a. origin is top padding
+
+        // 0. if the height is larger
+        // 0a. origin is top padding + (total height)/2 - outer radius
+
+        if ( isWidthLarger() == false /* so the height is the larger one */ ) {
+            return getPaddingTop() + getTotalHeight() / 2 - outerCircleRadius;
+        }
+
+        // 1. otherwise
+        // 1a. origin is top padding
+
+        return getPaddingTop();
+    }
+
+    /**
+     * Helper method to check which is larger, width or height
+     * */
+    // begin method isWidthLarger
+    private boolean isWidthLarger() {
+
+        // 0. get total width
+        // 1. get total height
+        // 2. return whether the width is larger
+
+        // 0. get total width
+        // 1. get total height
+        // 2. return whether the width is larger
+
+        return getTotalWidth() > getTotalHeight();
+
+    } // end method isWidthLarger
+
+    /** Helper method to get total width. */
+    // method getTotalWidth
+    private int getTotalWidth() {
+        return this.getMeasuredWidth() + getPaddingLeft() + getPaddingRight();
+    }
+
+    /** Helper method to get total height. */
+    // method getTotalHeight
+    private int getTotalHeight() {
+        return this.getMeasuredHeight() + getPaddingTop() + getPaddingBottom();
+    }
 
     /* INNER CLASSES */
 
