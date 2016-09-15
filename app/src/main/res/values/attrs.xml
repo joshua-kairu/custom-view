@@ -37,6 +37,8 @@
 
         <attr name="northIndicatorText" format="string" />
 
+        <attr name="northIndicatorStrokeWidth" format="float" />
+
         <attr name="arrowColor" format="color" />
 
         <attr name="arrowAngle" format="float" />

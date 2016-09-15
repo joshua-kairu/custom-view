@@ -56,6 +56,10 @@
 
             android:layout_height="match_parent"
 
+            custom:northIndicatorText="@string/north_indicator_text"
+
+            custom:northIndicatorColor="@android:color/black"
+
             />
 
         <!-- Button for changing view attributes -->
@@ -72,6 +76,7 @@
 
             android:text="@string/button_label"
 
+            android:visibility="gone"
             />
 
     </RelativeLayout>
