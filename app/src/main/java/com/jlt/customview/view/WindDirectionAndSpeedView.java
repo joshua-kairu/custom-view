@@ -54,6 +54,9 @@ public class WindDirectionAndSpeedView extends View {
      * It should be equal to the space between the north indicator and the inner circle. */
     private static final int NORTH_INDICATOR_VERTICAL_PADDING_DP = 4;
 
+    /** The default distance from the compass to the speed text in dp. */
+    private static final int DEFAULT_SPEED_TEXT_LEFT_PADDING_DP = 8;
+
     /* Strings */
         
     /* VARIABLES */
@@ -67,6 +70,7 @@ public class WindDirectionAndSpeedView extends View {
     private Paint mCirclePaint; // ditto
     private Paint mNorthIndicatorPaint; // ditto
     private Paint mArrowPaint; // ditto
+    private Paint mSpeedPaint; // ditto
 
     /* Paths */
 
@@ -79,11 +83,16 @@ public class WindDirectionAndSpeedView extends View {
     private int mNorthIndicatorColor; //ditto
     private int mArrowColor; // ditto
     private int mArrowAnimationDuration; // ditto
+    private int mSpeedColor; // ditto
 
     private float mArrowAngle; // ditto
     private float mArrowAngleToDraw; // ditto, used to draw the arrow during animation
     private float mRadiusDifference; // ditto
     private float mNorthIndicatorStrokeWidth; // ditto
+    private float mSpeedTextLeftX; // the left coordinate where we'll finally draw the speed text
+    private float mSpeedTextLeftXToDraw; // ditto, used for animation
+    private float mSpeedStrokeWidth; // ditto
+
 
     /* RectFs */
 
@@ -92,6 +101,7 @@ public class WindDirectionAndSpeedView extends View {
     /* Strings */
 
     private String mNorthIndicatorText; //ditto
+    private String mSpeedText; // ditto
 
     /* Text Paints */
 
@@ -131,6 +141,8 @@ public class WindDirectionAndSpeedView extends View {
         mNorthIndicatorPaint = new Paint();
 
         mArrowPaint = new Paint();
+
+        mSpeedPaint = new Paint();
 
         // 1b. paths
 
@@ -189,6 +201,16 @@ public class WindDirectionAndSpeedView extends View {
                     R.styleable.WindDirectionAndSpeedView_arrowAnimationDuration,
                     getResources().getInteger( android.R.integer.config_shortAnimTime ) * 5
                     // TODO: 9/18/16 I hope this 1500 ms value isn't gratuitous
+            );
+
+            mSpeedColor = a.getColor( R.styleable.WindDirectionAndSpeedView_speedColor,
+                    getResources().getColor( android.R.color.black )
+            );
+
+            mSpeedText = a.getString( R.styleable.WindDirectionAndSpeedView_speedText );
+
+            mSpeedStrokeWidth = a.getFloat(
+                    R.styleable.WindDirectionAndSpeedView_speedStrokeWidth, 2.0f
             );
 
         } // end trying to get things from XML
@@ -375,6 +397,45 @@ public class WindDirectionAndSpeedView extends View {
     /* Overrides */
 
     @Override
+    // begin onSizeChanged
+    protected void onSizeChanged( int currentWidth, int currentHeight, int oldWidth, int oldHeight ) {
+
+        // 0. super stuff
+        // 1. get the value for the left x of the speed text
+        // 1a. it is the x origin plus
+        // 1b. the outer circle's diameter plus
+        // 1c. the default speed text left padding
+
+        // 0. super stuff
+
+        super.onSizeChanged( currentWidth, currentHeight, oldWidth, oldHeight );
+
+        // 1. get the value for the left x of the speed text
+
+        // 1a. it is the x origin plus
+
+        // 1b. the outer circle's diameter plus
+
+        // copied from onDraw ;-)
+
+        int viewQuarterWidth = ( this.getMeasuredWidth() + getPaddingLeft() + getPaddingRight() ) / 4;
+        int viewQuarterHeight = ( this.getMeasuredHeight() + getPaddingTop() + getPaddingBottom() ) / 4;
+
+        int outerRadius = -1;
+
+        if ( viewQuarterWidth < viewQuarterHeight ) { outerRadius = viewQuarterWidth; }
+        else if ( viewQuarterHeight < viewQuarterWidth ) { outerRadius = viewQuarterHeight; }
+
+        // 1c. the default speed text left padding
+
+        int outerDiameter = outerRadius * 2;
+
+        mSpeedTextLeftX = getOriginX( outerRadius ) + outerDiameter +
+                dpToPx( DEFAULT_SPEED_TEXT_LEFT_PADDING_DP );
+
+    } // end onSizeChanged
+
+    @Override
     // begin onDraw
     protected void onDraw( Canvas canvas ) {
 
@@ -409,7 +470,8 @@ public class WindDirectionAndSpeedView extends View {
         // 8a. should use the correct color
         // 8b. should use the correct boldness
         // 8c. should be in the correct position
-        // 8c1. height should be the same as that of the inner circle
+        // 8c1. height should be about similar to half the inner circle radius,
+        // just as an on-the-fly rule of thumb
         // 8d. should be drawn
         // last. reset
         // lasta. the arrow path
@@ -541,6 +603,36 @@ public class WindDirectionAndSpeedView extends View {
         mArrowPath.transform( mArrowPathRotationMatrix );
 
         canvas.drawPath( mArrowPath, mArrowPaint );
+
+        // 8. draw speed text
+
+        // 8a. should use the correct color
+
+        mSpeedPaint.setColor( mSpeedColor );
+
+        // 8b. should use the correct boldness
+
+        mSpeedPaint.setStrokeWidth( mSpeedStrokeWidth );
+        mSpeedPaint.setStyle( Paint.Style.FILL );
+
+        // 8c. should be in the correct position
+
+        // 8c1. height should be about similar to half the inner circle radius,
+        // just as an on-the-fly rule of thumb
+
+        float speedTextSize = innerRadius / 2.0f;
+
+        mSpeedPaint.setTextSize( speedTextSize );
+
+        float speedTextHeight = Math.abs(
+                mSpeedPaint.getFontMetrics().bottom + mSpeedPaint.getFontMetrics().top
+        );
+
+        float speedTextY = viewQuarterHeight + speedTextHeight / 2.0f;
+
+        // 8d. should be drawn
+
+        canvas.drawText( mSpeedText, mSpeedTextLeftX, speedTextY, mSpeedPaint );
 
         // last. reset
 

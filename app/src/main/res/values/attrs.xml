@@ -47,6 +47,12 @@
 
         <attr name="radiusDifference" format="dimension" />
 
+        <attr name="speedColor" format="color" />
+
+        <attr name="speedText" format="string" />
+
+        <attr name="speedStrokeWidth" format="string" />
+
     </declare-styleable>
 
 </resources>
