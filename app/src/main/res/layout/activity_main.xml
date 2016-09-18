@@ -50,7 +50,7 @@
 
         <!-- the custom view -->
 
-        <com.jlt.customview.view.WindDirectionSpeedView
+        <com.jlt.customview.view.WindDirectionAndSpeedView
 
             android:layout_width="match_parent"
 

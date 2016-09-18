@@ -40,7 +40,7 @@ import com.jlt.customview.R;
  * A {@link android.view.View} that shows wind direction and speed.
  * */
 // begin class WindDirectionSpeedView
-public class WindDirectionSpeedView extends View {
+public class WindDirectionAndSpeedView extends View {
 
     /* CONSTANTS */
 
@@ -104,7 +104,7 @@ public class WindDirectionSpeedView extends View {
     /* CONSTRUCTOR */
 
     // begin default constructor for XML
-    public WindDirectionSpeedView( Context context, AttributeSet attrs ) {
+    public WindDirectionAndSpeedView( Context context, AttributeSet attrs ) {
 
         // 0. super stuff
         // 1. initialize things
@@ -121,6 +121,7 @@ public class WindDirectionSpeedView extends View {
         super( context, attrs );
 
         // 1. initialize things
+
         // 1a. paints
 
         mCirclePaint = new Paint();
@@ -150,42 +151,42 @@ public class WindDirectionSpeedView extends View {
         // 2. initialize member variables from the XML
 
         TypedArray a = context.getTheme().obtainStyledAttributes(
-                attrs, R.styleable.WindDirectionSpeedView, 0, 0
+                attrs, R.styleable.WindDirectionAndSpeedView, 0, 0
         );
 
         // begin trying to get things from XML
         try {
 
-            mOuterCircleColor = a.getColor( R.styleable.WindDirectionSpeedView_outerCircleColor,
+            mOuterCircleColor = a.getColor( R.styleable.WindDirectionAndSpeedView_outerCircleColor,
                     getResources().getColor( R.color.colorPrimary )
             );
 
-            mInnerCircleColor = a.getColor( R.styleable.WindDirectionSpeedView_innerCircleColor,
+            mInnerCircleColor = a.getColor( R.styleable.WindDirectionAndSpeedView_innerCircleColor,
                     getResources().getColor( android.R.color.white )
             );
 
-            mRadiusDifference = a.getFloat( R.styleable.WindDirectionSpeedView_radiusDifference,
+            mRadiusDifference = a.getFloat( R.styleable.WindDirectionAndSpeedView_radiusDifference,
                     dpToPx( DEFAULT_RADIUS_DIFFERENCE_DP )
             );
 
-            mNorthIndicatorText = a.getString( R.styleable.WindDirectionSpeedView_northIndicatorText );
+            mNorthIndicatorText = a.getString( R.styleable.WindDirectionAndSpeedView_northIndicatorText );
 
-            mNorthIndicatorColor = a.getColor( R.styleable.WindDirectionSpeedView_northIndicatorColor,
+            mNorthIndicatorColor = a.getColor( R.styleable.WindDirectionAndSpeedView_northIndicatorColor,
                     getResources().getColor( android.R.color.black )
             );
 
             mNorthIndicatorStrokeWidth = a.getFloat(
-                    R.styleable.WindDirectionSpeedView_northIndicatorStrokeWidth, 2.0f
+                    R.styleable.WindDirectionAndSpeedView_northIndicatorStrokeWidth, 2.0f
             );
 
-            mArrowColor = a.getColor( R.styleable.WindDirectionSpeedView_arrowColor,
+            mArrowColor = a.getColor( R.styleable.WindDirectionAndSpeedView_arrowColor,
                     getResources().getColor( R.color.colorAccent )
             );
 
-            mArrowAngle = a.getFloat( R.styleable.WindDirectionSpeedView_arrowAngle, 0f );
+            mArrowAngle = a.getFloat( R.styleable.WindDirectionAndSpeedView_arrowAngle, 0f );
 
             mArrowAnimationDuration = a.getInt(
-                    R.styleable.WindDirectionSpeedView_arrowAnimationDuration,
+                    R.styleable.WindDirectionAndSpeedView_arrowAnimationDuration,
                     getResources().getInteger( android.R.integer.config_shortAnimTime ) * 5
                     // TODO: 9/18/16 I hope this 1500 ms value isn't gratuitous
             );
@@ -200,7 +201,7 @@ public class WindDirectionSpeedView extends View {
         animateArrowRotation( 0, mArrowAngle );
 
     } // end default constructor for XML
-    
+
     /* METHODS */
     
     /* Getters and Setters */
@@ -403,6 +404,13 @@ public class WindDirectionSpeedView extends View {
         // 5e. color the arrow
         // 5last. draw the arrow
         // 6. rotate the arrow as needed
+        // 7. put a space (of 16 dp) between speed text and compass
+        // 8. draw speed text
+        // 8a. should use the correct color
+        // 8b. should use the correct boldness
+        // 8c. should be in the correct position
+        // 8c1. height should be the same as that of the inner circle
+        // 8d. should be drawn
         // last. reset
         // lasta. the arrow path
         // lastb. the rotation matrix
@@ -415,13 +423,13 @@ public class WindDirectionSpeedView extends View {
 
         // 1a. radius should be half the smaller of the lengths
 
-        int viewHalfWidth = ( this.getMeasuredWidth() + getPaddingLeft() + getPaddingRight() ) / 2;
-        int viewHalfHeight = ( this.getMeasuredHeight() + getPaddingTop() + getPaddingBottom() ) / 2;
+        int viewQuarterWidth = ( this.getMeasuredWidth() + getPaddingLeft() + getPaddingRight() ) / 4;
+        int viewQuarterHeight = ( this.getMeasuredHeight() + getPaddingTop() + getPaddingBottom() ) / 4;
 
         int outerRadius = -1;
 
-        if ( viewHalfWidth < viewHalfHeight ) { outerRadius = viewHalfWidth; }
-        else if ( viewHalfHeight < viewHalfWidth ) { outerRadius = viewHalfHeight; }
+        if ( viewQuarterWidth < viewQuarterHeight ) { outerRadius = viewQuarterWidth; }
+        else if ( viewQuarterHeight < viewQuarterWidth ) { outerRadius = viewQuarterHeight; }
 
         // 1b. use the outer circle color
 
@@ -429,7 +437,7 @@ public class WindDirectionSpeedView extends View {
 
         // 1c. draw
 
-        canvas.drawCircle( viewHalfWidth, viewHalfHeight, outerRadius, mCirclePaint );
+        canvas.drawCircle( viewQuarterWidth, viewQuarterHeight, outerRadius, mCirclePaint );
 
         // 2. draw the inner circle
 
@@ -443,7 +451,7 @@ public class WindDirectionSpeedView extends View {
 
         // 2c. draw
 
-        canvas.drawCircle( viewHalfWidth, viewHalfHeight, innerRadius, mCirclePaint );
+        canvas.drawCircle( viewQuarterWidth, viewQuarterHeight, innerRadius, mCirclePaint );
 
         // 3. color the radius difference space -> already done by filling the circles
 
@@ -464,14 +472,14 @@ public class WindDirectionSpeedView extends View {
         float northIndicatorWidth = mTextPaint.measureText( mNorthIndicatorText );
 
         float northIndicatorY =
-                ( viewHalfHeight - outerRadius ) + // center it vertically on top of the outer circle
+                ( viewQuarterHeight - outerRadius ) + // center it vertically on top of the outer circle
                 mRadiusDifference / 2 + // put its baseline halfway the distance from the outer circle to the inner circle
                 ( northIndicatorHeight / 2 ) // put its baseline below the halfway by half the text height
                 ; // thus putting the indicator right in the middle of the circle
 
         // 4c. should be on the middle of the circle
 
-        float northIndicatorX = viewHalfWidth - northIndicatorWidth / 2.0f;
+        float northIndicatorX = viewQuarterWidth - northIndicatorWidth / 2.0f;
 
         // 4d. should use the right color
 
@@ -528,7 +536,7 @@ public class WindDirectionSpeedView extends View {
         // 6. rotate the arrow as needed
 
         // http://stackoverflow.com/questions/6763231/draw-rotated-path-at-particular-point
-        mArrowPathRotationMatrix.postRotate( mArrowAngleToDraw, getTotalWidth() / 2, getTotalHeight() / 2 );
+        mArrowPathRotationMatrix.postRotate( mArrowAngleToDraw, getTotalWidth() / 4, getTotalHeight() / 4 );
 
         mArrowPath.transform( mArrowPathRotationMatrix );
 
@@ -598,15 +606,15 @@ public class WindDirectionSpeedView extends View {
     private float getOriginX( float outerCircleRadius ) {
 
         // 0. if the width is larger
-        // 0a. origin is left padding + (total width)/2 - outer radius
+        // 0a. origin is left padding + (total width)/4 - outer radius
         // 1. otherwise
         // 1a. origin is left padding
 
         // 0. if the width is larger
-        // 0a. origin is left padding + (total width)/2 - outer radius
+        // 0a. origin is left padding + (total width)/4 - outer radius
 
         if ( isWidthLarger() == true ) {
-            return getPaddingLeft() + getTotalWidth() / 2 - outerCircleRadius;
+            return getPaddingLeft() + getTotalWidth() / 4 - outerCircleRadius;
         }
 
         // 1. otherwise
@@ -629,15 +637,15 @@ public class WindDirectionSpeedView extends View {
     private float getOriginY( float outerCircleRadius ) {
 
         // 0. if the height is larger
-        // 0a. origin is top padding + (total height)/2 - outer radius
+        // 0a. origin is top padding + (total height)/4 - outer radius
         // 1. otherwise
         // 1a. origin is top padding
 
         // 0. if the height is larger
-        // 0a. origin is top padding + (total height)/2 - outer radius
+        // 0a. origin is top padding + (total height)/4 - outer radius
 
         if ( isWidthLarger() == false /* so the height is the larger one */ ) {
-            return getPaddingTop() + getTotalHeight() / 2 - outerCircleRadius;
+            return getPaddingTop() + getTotalHeight() / 4 - outerCircleRadius;
         }
 
         // 1. otherwise
@@ -733,7 +741,7 @@ public class WindDirectionSpeedView extends View {
                         
                         // 1c2. invalidate, thus redraw
 
-                        WindDirectionSpeedView.this.invalidate();
+                        WindDirectionAndSpeedView.this.invalidate();
 
                     } // end onAnimationUpdate
 

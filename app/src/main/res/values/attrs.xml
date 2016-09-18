@@ -27,7 +27,7 @@
 
 <resources>
 
-    <declare-styleable name="WindDirectionSpeedView">
+    <declare-styleable name="WindDirectionAndSpeedView">
 
         <attr name="outerCircleColor" format="color" />
 
