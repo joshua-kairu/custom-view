@@ -60,6 +60,10 @@
 
             custom:northIndicatorColor="@android:color/black"
 
+            custom:arrowAngle="300"
+
+
+
             />
 
         <!-- Button for changing view attributes -->

@@ -21,14 +21,17 @@
 
 package com.jlt.customview.view;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 import com.jlt.customview.R;
@@ -55,6 +58,10 @@ public class WindDirectionSpeedView extends View {
         
     /* VARIABLES */
 
+    /* Matrices */
+
+    private Matrix mArrowPathRotationMatrix; // ditto
+
     /* Paints */
 
     private Paint mCirclePaint; // ditto
@@ -71,8 +78,10 @@ public class WindDirectionSpeedView extends View {
     private int mInnerCircleColor; // ditto
     private int mNorthIndicatorColor; //ditto
     private int mArrowColor; // ditto
+    private int mArrowAnimationDuration; // ditto
 
     private float mArrowAngle; // ditto
+    private float mArrowAngleToDraw; // ditto, used to draw the arrow during animation
     private float mRadiusDifference; // ditto
     private float mNorthIndicatorStrokeWidth; // ditto
 
@@ -88,6 +97,10 @@ public class WindDirectionSpeedView extends View {
 
     private TextPaint mTextPaint; // used to measure the text width
 
+    /* Value Animators */
+
+    private ValueAnimator mArrowValueAnimator; // to animate the arrow
+
     /* CONSTRUCTOR */
 
     // begin default constructor for XML
@@ -98,7 +111,10 @@ public class WindDirectionSpeedView extends View {
         // 1a. paints
         // 1b. paths
         // 1c. rectangles
-        // 3. initialize member variables from the XML
+        // 1d. matrices
+        // 1e. animators
+        // 2. initialize member variables from the XML
+        // 3. animate the arrow rotation
 
         // 0. super stuff
 
@@ -123,7 +139,15 @@ public class WindDirectionSpeedView extends View {
 
         mArrowBottomArcRectF = new RectF();
 
-        // 3. initialize member variables from the XML
+        // 1d. matrices
+
+        mArrowPathRotationMatrix = new Matrix();
+
+        // 1e. animators
+
+        mArrowValueAnimator = null;
+
+        // 2. initialize member variables from the XML
 
         TypedArray a = context.getTheme().obtainStyledAttributes(
                 attrs, R.styleable.WindDirectionSpeedView, 0, 0
@@ -160,9 +184,20 @@ public class WindDirectionSpeedView extends View {
 
             mArrowAngle = a.getFloat( R.styleable.WindDirectionSpeedView_arrowAngle, 0f );
 
+            mArrowAnimationDuration = a.getInt(
+                    R.styleable.WindDirectionSpeedView_arrowAnimationDuration,
+                    getResources().getInteger( android.R.integer.config_shortAnimTime ) * 5
+                    // TODO: 9/18/16 I hope this 1500 ms value isn't gratuitous
+            );
+
         } // end trying to get things from XML
 
         finally { a.recycle(); }
+
+        // 3. animate the arrow rotation
+
+        // from 0 degrees to the current angle
+        animateArrowRotation( 0, mArrowAngle );
 
     } // end default constructor for XML
     
@@ -239,16 +274,54 @@ public class WindDirectionSpeedView extends View {
         return mArrowAngle;
     }
 
-    // setter for the arrow angle
-    public void setArrowAngle( float arrowAngle ) {
+    // begin setter for the arrow angle
+    public void setArrowAngle( float newArrowAngle ) {
 
-        this.mArrowAngle = arrowAngle;
+        // 0. take care of any invalid initialization
+        // 0a. if the new angle is less than zero then the member one should be zero
+        // 0b. if the new angle is greater than 360 then the member one should be within 360
+        // 0c. otherwise everything is okay, the member angle should have the value of the new angle
+        // 1. animate the new angle
+        // NB. no need to refresh the layout since the animation cares for that
+
+        // 0. take care of any invalid initialization
+
+        // 0a. if the new angle is less than zero then the member one should be zero
+
+        if ( newArrowAngle < 0f ) { mArrowAngle = 0; }
+
+        // 0b. if the new angle is greater than 360 then the member one should be within 360
+
+        else if ( newArrowAngle > 360f ) { mArrowAngle = 360 - newArrowAngle % 360; }
+
+        // 0c. otherwise everything is okay, the member angle should have the value of the new angle
+
+        else { mArrowAngle = newArrowAngle; }
+
+        // 1. animate the new angle
+        
+        // we'll animate from 0 degrees to the arrow angle's degrees 
+        animateArrowRotation( 0, getArrowAngle() );
+        
+        // NB. no need to refresh the layout since the animation cares for that
+        
+    } // end setter for the arrow angle
+
+    // getter for the arrow animation duration
+    public int getArrowAnimationDuration() {
+        return mArrowAnimationDuration;
+    }
+
+    // begin setter for the arrow animation duration
+    public void setArrowAnimationDuration( int arrowAnimationDuration ) {
+
+        this.mArrowAnimationDuration = arrowAnimationDuration;
 
         // refresh the layout
         invalidate();
         requestLayout();
 
-    }
+    } // end setter for the arrow animation duration
 
     // getter for the north indicator text
     public String getNorthIndicatorText() {
@@ -329,6 +402,10 @@ public class WindDirectionSpeedView extends View {
         // 5d. join the points
         // 5e. color the arrow
         // 5last. draw the arrow
+        // 6. rotate the arrow as needed
+        // last. reset
+        // lasta. the arrow path
+        // lastb. the rotation matrix
 
         // 0. super stuff
 
@@ -446,9 +523,27 @@ public class WindDirectionSpeedView extends View {
         mArrowPaint.setColor( mArrowColor );
         mArrowPaint.setStyle( Paint.Style.FILL );
 
-        // 5last. draw the arrow
+        // 5last. draw the arrow -> drawn when rotated at 6
+
+        // 6. rotate the arrow as needed
+
+        // http://stackoverflow.com/questions/6763231/draw-rotated-path-at-particular-point
+        mArrowPathRotationMatrix.postRotate( mArrowAngleToDraw, getTotalWidth() / 2, getTotalHeight() / 2 );
+
+        mArrowPath.transform( mArrowPathRotationMatrix );
 
         canvas.drawPath( mArrowPath, mArrowPaint );
+
+        // last. reset
+
+        // lasta. the arrow path
+
+        mArrowPath.reset();
+
+        // lastb. the rotation matrix
+
+        // http://android-er.blogspot.co.ke/2014/06/rotate-path-with-matrix.html, MyShape.onDraw
+        mArrowPathRotationMatrix.reset();
 
     } // end onDraw
 
@@ -459,7 +554,7 @@ public class WindDirectionSpeedView extends View {
      *
      * @param dp    The integer dp value.
      *
-     * @returns     A float representing the pixel value of the passed in dp.
+     * @return      A float representing the pixel value of the passed in dp.
      * */
     // method dpToPx
     private float dpToPx( int dp ) {
@@ -580,6 +675,105 @@ public class WindDirectionSpeedView extends View {
     private int getTotalHeight() {
         return this.getMeasuredHeight() + getPaddingTop() + getPaddingBottom();
     }
+
+    /** 
+     * Helper method to animate the rotation of the arrow. 
+     * 
+     * @param previousAngle The angle to rotate from, in degrees.
+     * @param targetAngle The angle to rotate to, in degrees.
+     * */
+    // begin method animateArrowRotation
+    private void animateArrowRotation( final float previousAngle, float targetAngle ) {
+
+        // 0. if there is an animation happening, stop it
+        // 1. we are about to animate
+        // 1a. animate from the angle at step 0 to the member angle
+        // 1b. for the standard android short time
+        // 1c. and on every animation update
+        // 1c1. store the current value of the animation as the arrow angle we should draw
+        // 1c2. invalidate, thus redraw
+        // 2. animate!
+
+        // 0. if there is an animation happening, stop it
+
+        if ( mArrowValueAnimator != null ) { mArrowValueAnimator.cancel(); }
+
+        // 1. we are about to animate
+
+        mArrowValueAnimator =
+
+                // 1a. animate from the angle at step 0 to the member angle
+
+                ValueAnimator.ofFloat( previousAngle, targetAngle )
+
+                // 1b. for the standard android short time
+
+                .setDuration( getAnimationDurationToUse( previousAngle, targetAngle ) );
+
+        // 1c. and on every animation update
+
+        // begin addUpdateListener
+        mArrowValueAnimator.addUpdateListener(
+
+                // begin new ValueAnimator.AnimatorUpdateListener
+                new ValueAnimator.AnimatorUpdateListener() {
+
+                    @Override
+                    // begin onAnimationUpdate
+                    public void onAnimationUpdate( ValueAnimator valueAnimator ) {
+
+                        // 1c1. store the current value of the animation
+                        //      as the arrow angle we should draw
+
+                        mArrowAngleToDraw = ( float ) valueAnimator.getAnimatedValue();
+
+                        Log.e( "onAnimationUpdate: ",
+                                "previousAngle = " + previousAngle +
+                                        " mArrowAngleToDraw = " + mArrowAngleToDraw );
+                        
+                        // 1c2. invalidate, thus redraw
+
+                        WindDirectionSpeedView.this.invalidate();
+
+                    } // end onAnimationUpdate
+
+                } // end new ValueAnimator.AnimatorUpdateListener
+
+        ); // end addUpdateListener
+
+        // 2. animate!
+
+        mArrowValueAnimator.start();
+
+    } // end method animateArrowRotation
+
+    /**
+     * Returns an animation duration that is dependent on
+     * the amount of change between the animation start and end degrees.
+     * Courtesy of https://www.intertech.com/Blog/android-custom-view-tutorial-part-4-animation/.
+     *
+     * @param animationStartDegree   The degree that the animation starts from
+     * @param animationEndDegree    The degree that the animation ends at
+     *
+     * @return The time the animation should run
+     * */
+    // begin method getAnimationDurationToUse
+    private long getAnimationDurationToUse( float animationStartDegree, float animationEndDegree ) {
+
+        // 0. get the difference between the two degrees
+        // 1. the time used should be proportional to how much difference there is between the degrees
+
+        // 0. get the difference between the two degrees
+
+        float degreeDifference = Math.abs( animationEndDegree - animationStartDegree );
+
+        // 1. the time used should be proportional to how much difference there is between the degrees
+
+        float maxDegrees = 360f;
+
+        return ( long ) ( mArrowAnimationDuration * ( degreeDifference / maxDegrees ) );
+
+    } // end method getAnimationDurationToUse
 
     /* INNER CLASSES */
 
