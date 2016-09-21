@@ -46,7 +46,31 @@
 
         tools:context="com.jlt.customview.MainActivity"
 
+        android:id="@+id/am_rl_main"
+
         >
+
+        <!-- TextView to display the generated wind direction and speed -->
+
+        <TextView
+
+            android:id="@+id/am_tv_display"
+
+            android:layout_width="wrap_content"
+
+            android:layout_height="wrap_content"
+
+            style="@style/TextAppearance.AppCompat.Display1"
+
+            tools:text="arg2wg"
+
+            android:layout_centerHorizontal="true"
+
+            android:gravity="center_horizontal"
+
+            android:paddingBottom="@dimen/text_baseline"
+
+            />
 
         <!-- the custom view -->
 
@@ -56,31 +80,49 @@
 
             android:layout_height="wrap_content"
 
+            android:id="@+id/am_wdasv_wind_speed_and_direction"
+
             custom:northIndicatorText="@string/north_indicator_text"
 
             custom:northIndicatorColor="@android:color/black"
 
-            custom:arrowAngle="300"
+            android:layout_centerHorizontal="true"
 
-            custom:speedText="135 Km/H"
+            android:layout_below="@id/am_tv_display"
 
             />
 
-        <!-- Button for changing view attributes -->
+        <!-- FAB for changing the wind speed and direction -->
 
-        <Button
+        <!-- A FAB -->
+
+        <android.support.design.widget.FloatingActionButton
+
+            android:id="@+id/am_fab_refresh"
 
             android:layout_width="wrap_content"
 
             android:layout_height="wrap_content"
 
-            android:layout_centerHorizontal="true"
+            android:layout_margin="16dp"
+
+            custom:srcCompat="@drawable/avd_refresh"
+
+            custom:elevation="6dp"
+
+            custom:fabSize="normal"
+
+            custom:pressedTranslationZ="12dp"
+
+            custom:borderWidth="0dp"
+
+            android:layout_alignParentBottom="true"
+
+            android:layout_alignParentEnd="true"
+
+            android:layout_alignParentRight="true"
 
             android:onClick="buttonTapped"
-
-            android:text="@string/button_label"
-
-            android:visibility="gone"
 
             />
 

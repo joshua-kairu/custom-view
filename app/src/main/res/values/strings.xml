@@ -22,7 +22,7 @@
  -->
 
 <!-- strings -->
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <string name="app_name">CustomView</string>
 
@@ -33,4 +33,31 @@
     <string name="help">Help!</string>
 
     <string name="north_indicator_text">N</string>
+
+    <!-- Vectors -->
+
+    <string name="refresh_group">Refresh group</string>
+
+    <!-- Wind speed formats -->
+
+    <!-- Wind in mph [CHAR LIMIT=25] -->
+    <string name="format_wind_mph">
+        Wind: <xliff:g id="speed">%1$1.0f</xliff:g> mph <xliff:g id="direction">%2$s</xliff:g>
+    </string>
+
+    <!-- Wind in kmh [CHAR LIMIT=25] -->
+    <string name="format_wind_kmh">
+        Wind: <xliff:g id="speed">%1$1.0f</xliff:g> km/h <xliff:g id="direction">%2$s</xliff:g>
+    </string>/string>
+
+    <!-- Wind in mph without direction [CHAR LIMIT=25] -->
+    <string name="format_wind_mph_sans_direction">
+        <xliff:g id="speed">%1.0f</xliff:g> mph
+    </string>
+
+    <!-- Wind in kmh without direction [CHAR LIMIT=25] -->
+    <string name="format_wind_kmh_sans_direction">
+        <xliff:g id="speed">%1.0f</xliff:g> km/h
+    </string>/string>
+
 </resources>

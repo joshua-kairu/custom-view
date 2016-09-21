@@ -32,7 +32,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.text.TextPaint;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 
 import com.jlt.customview.R;
@@ -58,10 +57,6 @@ public class WindDirectionAndSpeedView extends View {
     /** The default distance from the compass to the speed text in dp. */
     private static final int DEFAULT_SPEED_TEXT_LEFT_PADDING_DP = 8;
 
-    /* Strings */
-
-    private static final String LOG_TAG = WindDirectionAndSpeedView.class.getSimpleName(); // logger
-        
     /* VARIABLES */
 
     /* Matrices */
@@ -109,16 +104,6 @@ public class WindDirectionAndSpeedView extends View {
 
     private String mNorthIndicatorText; //ditto
 
-    // getter for the speed text
-    public String getSpeedText() {
-        return mSpeedText;
-    }
-
-    // setter for the speed text
-    public void setSpeedText( String speedText ) {
-        this.mSpeedText = speedText;
-    }
-
     private String mSpeedText; // ditto
 
     /* Text Paints */
@@ -143,10 +128,9 @@ public class WindDirectionAndSpeedView extends View {
         // 1c. rectangles
         // 1d. matrices
         // 1e. animators
-        // 1f. useful animation times
         // 2. initialize member variables from the XML
-        // 3. animate the arrow rotation
-        // 4. animate the speed text
+        // 3. initialize the animation duration we will use to be the smallest possible
+        // since we are just starting
 
         // 0. super stuff
 
@@ -185,10 +169,6 @@ public class WindDirectionAndSpeedView extends View {
         mSpeedAlphaValueAnimator = null;
 
         mSpeedTranslationXValueAnimator = null;
-
-        // 1f. useful animation times
-
-        mAnimationDurationToUse = -1;
 
         // 2. initialize member variables from the XML
 
@@ -239,6 +219,8 @@ public class WindDirectionAndSpeedView extends View {
 
             mSpeedText = a.getString( R.styleable.WindDirectionAndSpeedView_speedText );
 
+            if ( mSpeedText == null ) { mSpeedText = ""; }
+
             mSpeedStrokeWidth = a.getFloat(
                     R.styleable.WindDirectionAndSpeedView_speedStrokeWidth, 2.0f
             );
@@ -247,14 +229,10 @@ public class WindDirectionAndSpeedView extends View {
 
         finally { a.recycle(); }
 
-//        // 3. animate the arrow rotation
-//
-//        // from 0 degrees to the current angle
-//        animateArrowRotation( 0, mArrowAngle );
-//
-//        // 4. animate the speed text
-//
-//        animateSpeedText();
+        // 3. initialize the animation duration we will use to be the smallest possible
+        // since we are just starting
+
+        setAnimationDurationToUse( -1, -1, -1 );
 
     } // end default constructor for XML
 
@@ -361,6 +339,9 @@ public class WindDirectionAndSpeedView extends View {
         animateArrowRotation( 0, getArrowAngle() );
         
         // NB. no need to refresh the layout since the animation cares for that
+
+        invalidate();
+        requestLayout();
         
     } // end setter for the arrow angle
 
@@ -428,6 +409,24 @@ public class WindDirectionAndSpeedView extends View {
 
     }
 
+    // getter for the speed text
+    public String getSpeedText() {
+        return mSpeedText;
+    }
+
+    // setter for the speed text
+    public void setSpeedText( String speedText ) {
+
+        this.mSpeedText = speedText;
+
+        animateSpeedText();
+
+        // refresh the layout
+        invalidate();
+        requestLayout();
+
+    }
+
     /* Overrides */
 
     @Override
@@ -476,9 +475,6 @@ public class WindDirectionAndSpeedView extends View {
         mTextPaint.getTextBounds( mSpeedText, 0, mSpeedText.length(), speedTextBoundsRect );
 
         mSpeedTextLeftXToDraw = mSpeedTextLeftX - speedTextBoundsRect.width();
-
-        Log.e( LOG_TAG, "onSizeChanged: mSpeedTextLeftX = " + mSpeedTextLeftX +
-                " mSpeedTextLeftXToDraw = " + mSpeedTextLeftXToDraw  );
 
         // 3. animate the arrow rotation
 
@@ -588,9 +584,6 @@ public class WindDirectionAndSpeedView extends View {
         // 8e. should be drawn
 
         canvas.drawText( mSpeedText, mSpeedTextLeftXToDraw, speedTextY, mSpeedPaint );
-
-        Log.e( LOG_TAG, "onDraw: mSpeedTextLeftXToDraw = " + mSpeedTextLeftXToDraw  );
-        Log.e( LOG_TAG, "onDraw: mSpeedTextLeftX = " + mSpeedTextLeftX );
 
         // 1. draw the outer circle
 
@@ -873,15 +866,15 @@ public class WindDirectionAndSpeedView extends View {
 
         // 1. we are about to animate
 
-        mArrowValueAnimator =
+        // 1a. animate from the previous angle to the target angle
 
-                // 1a. animate from the previous angle to the target angle
+        mArrowValueAnimator = ValueAnimator.ofFloat( previousAngle, targetAngle );
 
-                ValueAnimator.ofFloat( previousAngle, targetAngle )
+        // 1b. for a time dependent on the start and end angles
 
-                // 1b. for a time dependent on the start and end angles
+        setAnimationDurationToUse( previousAngle, targetAngle, 360f );
 
-                .setDuration( getAnimationDurationToUse( previousAngle, targetAngle, 360f ) );
+        mArrowValueAnimator.setDuration( getAnimationDurationToUse() );
 
         // 1c. and on every animation update
 
@@ -900,10 +893,6 @@ public class WindDirectionAndSpeedView extends View {
 
                         mArrowAngleToDraw = ( float ) valueAnimator.getAnimatedValue();
 
-//                        Log.e( "onAnimationUpdate: ",
-//                                "previousAngle = " + previousAngle +
-//                                        " mArrowAngleToDraw = " + mArrowAngleToDraw );
-                        
                         // 1c2. invalidate, thus redraw
 
                         WindDirectionAndSpeedView.this.invalidate();
@@ -921,14 +910,8 @@ public class WindDirectionAndSpeedView extends View {
     } // end method animateArrowRotation
 
     /**
-     * Returns an animation duration that is dependent on
+     * Sets the animation duration to use to be dependent on
      * the amount of change between the animation start and end values.
-     * It is decided that the arrow rotation is what will determine the animation. Thus
-     * this method will calculate the duration needed for the arrow angle to move at a constant speed
-     * and store it in a member variable. Since this method is called first during
-     * the calculation of arrow animation time, it is guaranteed
-     * to initialize the member variable just fine.  After that is done, subsequent calls
-     * to this method will simply return the member variable.
      *
      * Courtesy of https://www.intertech.com/Blog/android-custom-view-tutorial-part-4-animation/.
      *
@@ -936,43 +919,30 @@ public class WindDirectionAndSpeedView extends View {
      * @param animationEndValue     The value that the animation ends at
      * @param maxValue              The maximum possible value that these two values can be
      *
-     * @return The time the animation should run
      * */
-    // begin method getAnimationDurationToUse
-    private long getAnimationDurationToUse( float animationStartValue, float animationEndValue,
+    // begin method setAnimationDurationToUse
+    private void setAnimationDurationToUse( float animationStartValue, float animationEndValue,
                                             float maxValue ) {
 
-        // 0. if the member variable is not initialized
-        // 0a. get the difference between the two values
-        // 0b. the time used should be proportional to
+        // 0. get the difference between the two values
+        // 1. the time used should be proportional to
         // how much difference there is between the values
-        // 1. otherwise
-        // 1a. return the member variable
 
-        // 0. if the member variable is not initialized
+        // 0. get the difference between the two values
 
-        // begin if the member animation duration to use is not initialized
-        if ( mAnimationDurationToUse == -1 ) {
+        float valueDifference = Math.abs( animationEndValue - animationStartValue );
 
-            // 0a. get the difference between the two values
+        // 1. the time used should be proportional to
+        // how much difference there is between the values
 
-            float valueDifference = Math.abs( animationEndValue - animationStartValue );
+        mAnimationDurationToUse = ( long ) ( mAnimationDuration * ( valueDifference / maxValue ) );
 
-            // 0b. the time used should be proportional to
-            // how much difference there is between the values
+    } // end method setAnimationDurationToUse
 
-            mAnimationDurationToUse =
-                    ( long ) ( mAnimationDuration * ( valueDifference / maxValue ) );
-
-        } // end if the member animation duration to use is not initialized
-
-        // 1. otherwise
-
-        // 1a. return the member variable
-
+    // begin method getAnimationDurationToUse
+    private long getAnimationDurationToUse() {
         return mAnimationDurationToUse;
-
-    } // end method getAnimationDurationToUse
+    }
 
     /**
      * Animates the speed text.
@@ -989,10 +959,12 @@ public class WindDirectionAndSpeedView extends View {
 
         animateSpeedTextAlpha( 0, 255 ); // alpha ranges from 0 to 255, both inclusive
 
+        // 1. animate the translationX
+
         Rect speedTextBoundsRect = new Rect();
         mTextPaint.getTextBounds( mSpeedText, 0, mSpeedText.length(), speedTextBoundsRect );
 
-        // 1. animate the translationX
+        mSpeedTextLeftXToDraw = mSpeedTextLeftX - speedTextBoundsRect.width();
 
         animateSpeedTextTranslationX(
                 mSpeedTextLeftX - speedTextBoundsRect.width(), mSpeedTextLeftX
@@ -1012,7 +984,7 @@ public class WindDirectionAndSpeedView extends View {
         // 0. if there is an animation happening, stop it
         // 1. we are about to animate
         // 1a. animate from the start alpha to the end alpha
-        // 1b. for a time dependent on the start and end alpha
+        // 1b. for a time dependent on the animation duration we should use
         // 1c. and on every animation update
         // 1c1. store the current value of the animation as the alpha value we should draw
         // 1c2. invalidate, thus redraw
@@ -1024,11 +996,10 @@ public class WindDirectionAndSpeedView extends View {
 
         // 1. we are about to animate
         // 1a. animate from the start alpha to the end alpha
-        // 1b. for a time dependent on the start and end alpha -> NOT REALLY since
-        // we will have already initialized the animation duration to use
+        // 1b. for a time dependent on the animation duration we should use
 
         mSpeedAlphaValueAnimator = ValueAnimator.ofInt( startAlpha, endAlpha )
-                .setDuration( getAnimationDurationToUse( startAlpha, endAlpha, 255 ) );
+                .setDuration( getAnimationDurationToUse() );
 
         // 1c. and on every animation update
 
@@ -1075,7 +1046,7 @@ public class WindDirectionAndSpeedView extends View {
         // 0. if there is an animation happening, stop it
         // 1. we are about to animate
         // 1a. animate from the start translationX to the end translationX
-        // 1b. for a time dependent on the translationX and end translationX
+        // 1b. for a time dependent on the animation duration we should use
         // 1c. and on every animation update
         // 1c1. store the current value of the animation as the translationX value we should draw
         // 1c2. invalidate, thus redraw
@@ -1087,14 +1058,11 @@ public class WindDirectionAndSpeedView extends View {
 
         // 1. we are about to animate
         // 1a. animate from the start translationX to the end translationX
-        // 1b. for a time dependent on the start and end translationX -> NOT REALLY since
-        // we will have already initialized the animation duration to use
+        // 1b. for a time dependent on the animation duration we should use
 
         mSpeedTranslationXValueAnimator =
                 ValueAnimator.ofFloat( startTranslationX, endTranslationX )
-                .setDuration( getAnimationDurationToUse( startTranslationX, endTranslationX,
-                        mSpeedTextLeftX )
-                );
+                .setDuration( getAnimationDurationToUse() );
 
         // 1c. and on every animation update
 
@@ -1128,7 +1096,6 @@ public class WindDirectionAndSpeedView extends View {
         mSpeedTranslationXValueAnimator.start();
 
     } // end method animateSpeedTextTranslationX
-
 
     /* INNER CLASSES */
 

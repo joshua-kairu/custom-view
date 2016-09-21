@@ -43,7 +43,7 @@
 
         <attr name="arrowAngle" format="float" />
 
-        <attr name="arrowAnimationDuration" format="integer" />
+        <attr name="animationDuration" format="integer" />
 
         <attr name="radiusDifference" format="dimension" />
 
