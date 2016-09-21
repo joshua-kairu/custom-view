@@ -108,6 +108,17 @@ public class WindDirectionAndSpeedView extends View {
     /* Strings */
 
     private String mNorthIndicatorText; //ditto
+
+    // getter for the speed text
+    public String getSpeedText() {
+        return mSpeedText;
+    }
+
+    // setter for the speed text
+    public void setSpeedText( String speedText ) {
+        this.mSpeedText = speedText;
+    }
+
     private String mSpeedText; // ditto
 
     /* Text Paints */
