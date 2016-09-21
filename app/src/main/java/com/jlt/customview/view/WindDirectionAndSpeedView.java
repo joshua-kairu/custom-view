@@ -127,14 +127,6 @@ public class WindDirectionAndSpeedView extends View {
 
         // 0. super stuff
         // 1. initialize things
-        // 1a. paints
-        // 1b. paths
-        // 1c. rectangles
-        // 1d. matrices
-        // 1e. animators
-        // 2. initialize member variables from the XML
-        // 3. initialize the animation duration we will use to be the smallest possible
-        // since we are just starting
 
         // 0. super stuff
 
@@ -142,101 +134,7 @@ public class WindDirectionAndSpeedView extends View {
 
         // 1. initialize things
 
-        // 1a. paints
-
-        mCirclePaint = new Paint();
-
-        mTextPaint = new TextPaint( mCirclePaint );
-
-        mNorthIndicatorPaint = new Paint();
-
-        mArrowPaint = new Paint();
-
-        mSpeedPaint = new Paint();
-
-        // 1b. paths
-
-        mArrowPath = new Path();
-
-        // 1c. rectangles
-
-        mArrowBottomArcRectF = new RectF();
-
-        // 1d. matrices
-
-        mArrowPathRotationMatrix = new Matrix();
-
-        // 1e. animators
-
-        mArrowValueAnimator = null;
-
-        mSpeedAlphaValueAnimator = null;
-
-        mSpeedTranslationXValueAnimator = null;
-
-        // 2. initialize member variables from the XML
-
-        TypedArray a = context.getTheme().obtainStyledAttributes(
-                attrs, R.styleable.WindDirectionAndSpeedView, 0, 0
-        );
-
-        // begin trying to get things from XML
-        try {
-
-            mOuterCircleColor = a.getColor( R.styleable.WindDirectionAndSpeedView_outerCircleColor,
-                    getResources().getColor( R.color.colorPrimary )
-            );
-
-            mInnerCircleColor = a.getColor( R.styleable.WindDirectionAndSpeedView_innerCircleColor,
-                    getResources().getColor( android.R.color.white )
-            );
-
-            mRadiusDifference = a.getFloat( R.styleable.WindDirectionAndSpeedView_radiusDifference,
-                    dpToPx( DEFAULT_RADIUS_DIFFERENCE_DP )
-            );
-
-            mNorthIndicatorText = a.getString( R.styleable.WindDirectionAndSpeedView_northIndicatorText );
-
-            mNorthIndicatorColor = a.getColor( R.styleable.WindDirectionAndSpeedView_northIndicatorColor,
-                    getResources().getColor( android.R.color.black )
-            );
-
-            mNorthIndicatorStrokeWidth = a.getFloat(
-                    R.styleable.WindDirectionAndSpeedView_northIndicatorStrokeWidth, 2.0f
-            );
-
-            mArrowColor = a.getColor( R.styleable.WindDirectionAndSpeedView_arrowColor,
-                    getResources().getColor( R.color.colorAccent )
-            );
-
-            mArrowAngle = a.getFloat( R.styleable.WindDirectionAndSpeedView_arrowAngle, 0f );
-
-            mAnimationDuration = a.getInt(
-                    R.styleable.WindDirectionAndSpeedView_animationDuration,
-                    getResources().getInteger( android.R.integer.config_shortAnimTime ) * 5
-                    // TODO: 9/18/16 I hope this 1500 ms value isn't gratuitous
-            );
-
-            mSpeedColor = a.getColor( R.styleable.WindDirectionAndSpeedView_speedColor,
-                    getResources().getColor( android.R.color.black )
-            );
-
-            mSpeedText = a.getString( R.styleable.WindDirectionAndSpeedView_speedText );
-
-            if ( mSpeedText == null ) { mSpeedText = ""; }
-
-            mSpeedStrokeWidth = a.getFloat(
-                    R.styleable.WindDirectionAndSpeedView_speedStrokeWidth, 2.0f
-            );
-
-        } // end trying to get things from XML
-
-        finally { a.recycle(); }
-
-        // 3. initialize the animation duration we will use to be the smallest possible
-        // since we are just starting
-
-        setAnimationDurationToUse( -1, -1, -1 );
+        initView( context, attrs );
 
     } // end default constructor for XML
 
@@ -1147,6 +1045,121 @@ public class WindDirectionAndSpeedView extends View {
     private float getTextLength( String text, TextPaint textPaint ) {
         return textPaint.measureText( text );
     }
+
+    /** Initializes this view. */
+    // begin method initView
+    private void initView( Context context, AttributeSet attrs ) {
+
+        // 0. initialize
+        // 0a. paints
+        // 0b. paths
+        // 0c. rectangles
+        // 0d. matrices
+        // 0e. animators
+        // 1. initialize member variables from the XML
+        // 2. initialize the animation duration we will use to be the smallest possible
+        // since we are just starting
+
+
+        // 0. initialize things
+
+        // 0a. paints
+
+        mCirclePaint = new Paint();
+
+        mTextPaint = new TextPaint( mCirclePaint );
+
+        mNorthIndicatorPaint = new Paint();
+
+        mArrowPaint = new Paint();
+
+        mSpeedPaint = new Paint();
+
+        // 0b. paths
+
+        mArrowPath = new Path();
+
+        // 0c. rectangles
+
+        mArrowBottomArcRectF = new RectF();
+
+        // 0d. matrices
+
+        mArrowPathRotationMatrix = new Matrix();
+
+        // 0e. animators
+
+        mArrowValueAnimator = null;
+
+        mSpeedAlphaValueAnimator = null;
+
+        mSpeedTranslationXValueAnimator = null;
+
+        // 1. initialize member variables from the XML
+
+        TypedArray a = context.getTheme().obtainStyledAttributes(
+                attrs, R.styleable.WindDirectionAndSpeedView, 0, 0
+        );
+
+        // begin trying to get things from XML
+        try {
+
+            mOuterCircleColor = a.getColor( R.styleable.WindDirectionAndSpeedView_outerCircleColor,
+                    getResources().getColor( R.color.colorPrimary )
+            );
+
+            mInnerCircleColor = a.getColor( R.styleable.WindDirectionAndSpeedView_innerCircleColor,
+                    getResources().getColor( android.R.color.white )
+            );
+
+            mRadiusDifference = a.getFloat( R.styleable.WindDirectionAndSpeedView_radiusDifference,
+                    dpToPx( DEFAULT_RADIUS_DIFFERENCE_DP )
+            );
+
+            mNorthIndicatorText = a.getString( R.styleable.WindDirectionAndSpeedView_northIndicatorText );
+
+            mNorthIndicatorColor = a.getColor( R.styleable.WindDirectionAndSpeedView_northIndicatorColor,
+                    getResources().getColor( android.R.color.black )
+            );
+
+            mNorthIndicatorStrokeWidth = a.getFloat(
+                    R.styleable.WindDirectionAndSpeedView_northIndicatorStrokeWidth, 2.0f
+            );
+
+            mArrowColor = a.getColor( R.styleable.WindDirectionAndSpeedView_arrowColor,
+                    getResources().getColor( R.color.colorAccent )
+            );
+
+            mArrowAngle = a.getFloat( R.styleable.WindDirectionAndSpeedView_arrowAngle, 0f );
+
+            mAnimationDuration = a.getInt(
+                    R.styleable.WindDirectionAndSpeedView_animationDuration,
+                    getResources().getInteger( android.R.integer.config_shortAnimTime ) * 5
+                    // TODO: 9/18/16 I hope this 1500 ms value isn't gratuitous
+            );
+
+            mSpeedColor = a.getColor( R.styleable.WindDirectionAndSpeedView_speedColor,
+                    getResources().getColor( android.R.color.black )
+            );
+
+            mSpeedText = a.getString( R.styleable.WindDirectionAndSpeedView_speedText );
+
+            if ( mSpeedText == null ) { mSpeedText = ""; }
+
+            mSpeedStrokeWidth = a.getFloat(
+                    R.styleable.WindDirectionAndSpeedView_speedStrokeWidth, 2.0f
+            );
+
+        } // end trying to get things from XML
+
+        finally { a.recycle(); }
+
+        // 2. initialize the animation duration we will use to be the smallest possible
+        // since we are just starting
+
+        setAnimationDurationToUse( -1, -1, -1 );
+
+    } // end method initView
 
     /* INNER CLASSES */
 
