@@ -36,97 +36,272 @@
 
     >
 
-    <RelativeLayout
+    <ScrollView
 
         android:layout_width="match_parent"
 
         android:layout_height="match_parent"
 
-        android:padding="@dimen/layout_padding"
-
-        tools:context="com.jlt.customview.MainActivity"
-
-        android:id="@+id/am_rl_main"
-
+        android:fillViewport="true"
         >
 
-        <!-- TextView to display the generated wind direction and speed -->
+        <RelativeLayout
 
-        <TextView
-
-            android:id="@+id/am_tv_display"
-
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
 
             android:layout_height="wrap_content"
 
-            style="@style/TextAppearance.AppCompat.Display1"
+            android:padding="@dimen/layout_padding"
 
-            tools:text="arg2wg"
+            tools:context="com.jlt.customview.MainActivity"
 
-            android:layout_centerHorizontal="true"
+            android:id="@+id/am_rl_main"
 
-            android:gravity="center_horizontal"
+            >
 
-            android:paddingBottom="@dimen/text_baseline"
+            <!-- TextView to display the generated wind direction and speed -->
 
-            />
+            <TextView
 
-        <!-- the custom view -->
+                android:id="@+id/am_tv_display"
 
-        <com.jlt.customview.view.WindDirectionAndSpeedView
+                android:layout_width="wrap_content"
 
-            android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
 
-            android:layout_height="wrap_content"
+                style="@style/TextAppearance.AppCompat.Display1"
 
-            android:id="@+id/am_wdasv_wind_speed_and_direction"
+                tools:text="@string/mock_text"
 
-            custom:northIndicatorText="@string/north_indicator_text"
+                android:layout_centerHorizontal="true"
 
-            custom:northIndicatorColor="@android:color/black"
+                android:gravity="center_horizontal"
 
-            android:layout_centerHorizontal="true"
+                android:paddingBottom="@dimen/text_baseline"
 
-            android:layout_below="@id/am_tv_display"
+                />
 
-            />
+            <LinearLayout
 
-        <!-- FAB for changing the wind speed and direction -->
+                android:layout_width="wrap_content"
 
-        <!-- A FAB -->
+                android:layout_height="wrap_content"
 
-        <android.support.design.widget.FloatingActionButton
+                android:layout_centerHorizontal="true"
 
-            android:id="@+id/am_fab_refresh"
+                android:gravity="center_horizontal"
 
-            android:layout_width="wrap_content"
+                android:layout_below="@id/am_tv_display"
 
-            android:layout_height="wrap_content"
+                android:orientation="vertical"
 
-            android:layout_margin="16dp"
+                android:id="@+id/am_ll_content"
 
-            custom:srcCompat="@drawable/avd_refresh"
+                >
 
-            custom:elevation="6dp"
+                <TextView
 
-            custom:fabSize="normal"
+                    android:layout_width="wrap_content"
 
-            custom:pressedTranslationZ="12dp"
+                    android:layout_height="wrap_content"
 
-            custom:borderWidth="0dp"
+                    style="@style/TextAppearance.AppCompat.Display1"
 
-            android:layout_alignParentBottom="true"
+                    android:text="@string/mock_text"
 
-            android:layout_alignParentEnd="true"
+                    android:gravity="center_horizontal"
 
-            android:layout_alignParentRight="true"
+                    android:paddingBottom="@dimen/text_baseline"
 
-            android:onClick="buttonTapped"
+                    />
 
-            />
+                <TextView
 
-    </RelativeLayout>
+                    android:layout_width="wrap_content"
+
+                    android:layout_height="wrap_content"
+
+                    style="@style/TextAppearance.AppCompat.Display1"
+
+                    android:text="@string/mock_text"
+
+                    android:gravity="center_horizontal"
+
+                    android:paddingBottom="@dimen/text_baseline"
+
+                    />
+
+                <TextView
+
+                    android:layout_width="wrap_content"
+
+                    android:layout_height="wrap_content"
+
+                    style="@style/TextAppearance.AppCompat.Display1"
+
+                    android:text="@string/mock_text"
+
+                    android:gravity="center_horizontal"
+
+                    android:paddingBottom="@dimen/text_baseline"
+
+                    />
+
+                <TextView
+
+                    android:layout_width="wrap_content"
+
+                    android:layout_height="wrap_content"
+
+                    style="@style/TextAppearance.AppCompat.Display1"
+
+                    android:text="@string/mock_text"
+
+                    android:gravity="center_horizontal"
+
+                    android:paddingBottom="@dimen/text_baseline"
+
+                    />
+
+                <TextView
+
+                    android:layout_width="wrap_content"
+
+                    android:layout_height="wrap_content"
+
+                    style="@style/TextAppearance.AppCompat.Display1"
+
+                    android:text="@string/mock_text"
+
+                    android:gravity="center_horizontal"
+
+                    android:paddingBottom="@dimen/text_baseline"
+
+                    />
+
+                <TextView
+
+                    android:layout_width="wrap_content"
+
+                    android:layout_height="wrap_content"
+
+                    style="@style/TextAppearance.AppCompat.Display1"
+
+                    android:text="@string/mock_text"
+
+                    android:gravity="center_horizontal"
+
+                    android:paddingBottom="@dimen/text_baseline"
+
+                    />
+
+                <TextView
+
+                    android:layout_width="wrap_content"
+
+                    android:layout_height="wrap_content"
+
+                    style="@style/TextAppearance.AppCompat.Display1"
+
+                    android:text="@string/mock_text"
+
+                    android:gravity="center_horizontal"
+
+                    android:paddingBottom="@dimen/text_baseline"
+
+                    />
+
+                <TextView
+
+                    android:layout_width="wrap_content"
+
+                    android:layout_height="wrap_content"
+
+                    style="@style/TextAppearance.AppCompat.Display1"
+
+                    android:text="@string/mock_text"
+
+                    android:gravity="center_horizontal"
+
+                    android:paddingBottom="@dimen/text_baseline"
+
+                    />
+
+                <TextView
+
+                    android:layout_width="wrap_content"
+
+                    android:layout_height="wrap_content"
+
+                    style="@style/TextAppearance.AppCompat.Display1"
+
+                    android:text="@string/mock_text"
+
+                    android:gravity="center_horizontal"
+
+                    android:paddingBottom="@dimen/text_baseline"
+
+                    />
+
+            </LinearLayout>
+
+            <!-- the custom view -->
+
+            <com.jlt.customview.view.WindDirectionAndSpeedView
+
+                android:layout_width="wrap_content"
+
+                android:layout_height="wrap_content"
+
+                android:id="@+id/am_wdasv_wind_speed_and_direction"
+
+                custom:northIndicatorText="@string/north_indicator_text"
+
+                custom:northIndicatorColor="@android:color/black"
+
+                android:layout_centerHorizontal="true"
+
+                android:layout_below="@id/am_ll_content"
+
+                />
+
+            <!-- FAB for changing the wind speed and direction -->
+
+            <!-- A FAB -->
+
+            <android.support.design.widget.FloatingActionButton
+
+                android:id="@+id/am_fab_refresh"
+
+                android:layout_width="wrap_content"
+
+                android:layout_height="wrap_content"
+
+                android:layout_margin="16dp"
+
+                custom:srcCompat="@drawable/avd_refresh"
+
+                custom:elevation="6dp"
+
+                custom:fabSize="normal"
+
+                custom:pressedTranslationZ="12dp"
+
+                custom:borderWidth="0dp"
+
+                android:layout_alignParentBottom="true"
+
+                android:layout_alignParentEnd="true"
+
+                android:layout_alignParentRight="true"
+
+                android:onClick="buttonTapped"
+
+                />
+
+        </RelativeLayout>
+
+    </ScrollView>
 
 </layout>
 

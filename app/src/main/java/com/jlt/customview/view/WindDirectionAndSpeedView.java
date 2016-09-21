@@ -28,7 +28,6 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.text.TextPaint;
 import android.util.AttributeSet;
@@ -56,6 +55,11 @@ public class WindDirectionAndSpeedView extends View {
 
     /** The default distance from the compass to the speed text in dp. */
     private static final int DEFAULT_SPEED_TEXT_LEFT_PADDING_DP = 8;
+
+    /* Strings */
+
+    /** The largest possible speed text. Used to calculate minimum height and width. */
+    public static final String LARGEST_SPEED_TEXT = "300 km/H"; // an assumption, of course.
 
     /* VARIABLES */
 
@@ -429,6 +433,38 @@ public class WindDirectionAndSpeedView extends View {
 
     /* Overrides */
 
+    /**
+     * Returns the suggested minimum height that the view should use.
+     *
+     * This returns the maximum of the view's minimum height and
+     * the background's minimum height (getMinimumHeight()).
+     *
+     * In our case, I think the view should be at least 4 times as high as the largest speed text.
+     * */
+    @Override
+    // begin getSuggestedMinimumHeight
+    protected int getSuggestedMinimumHeight() {
+
+        return ( int ) ( getTextLength( LARGEST_SPEED_TEXT, mTextPaint ) * 4 );
+
+    } // end getSuggestedMinimumHeight
+
+    /**
+     * Returns the suggested minimum height that the view should use.
+     *
+     * This returns the maximum of the view's minimum height and
+     * the background's minimum height (getMinimumHeight()).
+     *
+     * In our case, I think the view should be at least 4 times as high as the largest speed text.
+     * */
+    @Override
+    // begin getSuggestedMinimumWidth
+    protected int getSuggestedMinimumWidth() {
+
+        return ( int ) ( getTextLength( LARGEST_SPEED_TEXT, mTextPaint ) * 4 );
+
+    } // end getSuggestedMinimumWidth
+
     @Override
     // begin onSizeChanged
     protected void onSizeChanged( int currentWidth, int currentHeight, int oldWidth, int oldHeight ) {
@@ -453,13 +489,16 @@ public class WindDirectionAndSpeedView extends View {
 
         // copied from onDraw ;-)
 
-        int viewQuarterWidth = ( this.getMeasuredWidth() + getPaddingLeft() + getPaddingRight() ) / 4;
-        int viewQuarterHeight = ( this.getMeasuredHeight() + getPaddingTop() + getPaddingBottom() ) / 4;
+        int viewHalfHeight = getTotalHeight() / 2;
+
+        int viewHalfWidth = getTotalWidth() / 2;
 
         int outerRadius = -1;
 
-        if ( viewQuarterWidth < viewQuarterHeight ) { outerRadius = viewQuarterWidth; }
-        else if ( viewQuarterHeight < viewQuarterWidth ) { outerRadius = viewQuarterHeight; }
+        // we want the circle to stay in its half of the view
+
+        if ( getTotalHeight() < viewHalfWidth ) { outerRadius = viewHalfHeight; }
+        else if ( viewHalfWidth < getTotalHeight() ) { outerRadius = viewHalfWidth / 2; }
 
         // 1c. the default speed text left padding
 
@@ -471,10 +510,7 @@ public class WindDirectionAndSpeedView extends View {
         // 2. the speed's left x to draw should be to the left of the value in 1
         // by the length of the speed text
 
-        Rect speedTextBoundsRect = new Rect();
-        mTextPaint.getTextBounds( mSpeedText, 0, mSpeedText.length(), speedTextBoundsRect );
-
-        mSpeedTextLeftXToDraw = mSpeedTextLeftX - speedTextBoundsRect.width();
+        mSpeedTextLeftXToDraw = mSpeedTextLeftX - getTextLength( mSpeedText, mTextPaint );
 
         // 3. animate the arrow rotation
 
@@ -540,16 +576,22 @@ public class WindDirectionAndSpeedView extends View {
         // ALL VARIABLES NEEDED FOR DRAWING THE SPEED TEXT ARE DECLARED HERE BELOW,
         // EVEN THOUGH THEY WILL BE USED TO DRAW THE COMPASS LATER ON.
 
-        int viewQuarterHeight = ( this.getMeasuredHeight() + getPaddingTop() + getPaddingBottom() ) / 4;
+        int viewHalfHeight = getTotalHeight() / 2;
 
-        int viewQuarterWidth = ( this.getMeasuredWidth() + getPaddingLeft() + getPaddingRight() ) / 4;
+        int viewHalfWidth = getTotalWidth() / 2;
 
         int outerRadius = -1;
 
-        if ( viewQuarterWidth < viewQuarterHeight ) { outerRadius = viewQuarterWidth; }
-        else if ( viewQuarterHeight < viewQuarterWidth ) { outerRadius = viewQuarterHeight; }
+        // we want the circle to stay in its half of the view
+
+        if ( getTotalHeight() < viewHalfWidth ) { outerRadius = viewHalfHeight; }
+        else if ( viewHalfWidth < getTotalHeight() ) { outerRadius = viewHalfWidth / 2; }
 
         float innerRadius = outerRadius - mRadiusDifference;
+
+        float viewQuarterWidth = viewHalfWidth / 2;
+
+        float circleCenterX = viewQuarterWidth, circleCenterY = viewHalfHeight;
 
         // 8. draw speed text
 
@@ -575,7 +617,7 @@ public class WindDirectionAndSpeedView extends View {
                 mSpeedPaint.getFontMetrics().bottom + mSpeedPaint.getFontMetrics().top
         );
 
-        float speedTextY = viewQuarterHeight + speedTextHeight / 2.0f;
+        float speedTextY = viewHalfHeight + speedTextHeight / 2.0f;
 
         // 8d. should have the correct alpha
 
@@ -596,7 +638,7 @@ public class WindDirectionAndSpeedView extends View {
 
         // 1c. draw
 
-        canvas.drawCircle( viewQuarterWidth, viewQuarterHeight, outerRadius, mCirclePaint );
+        canvas.drawCircle( circleCenterX, circleCenterY, outerRadius, mCirclePaint );
 
         // 2. draw the inner circle
 
@@ -609,7 +651,7 @@ public class WindDirectionAndSpeedView extends View {
 
         // 2c. draw
 
-        canvas.drawCircle( viewQuarterWidth, viewQuarterHeight, innerRadius, mCirclePaint );
+        canvas.drawCircle( circleCenterX, circleCenterY, innerRadius, mCirclePaint );
 
         // 3. color the radius difference space -> already done by filling the circles
 
@@ -627,17 +669,17 @@ public class WindDirectionAndSpeedView extends View {
         // for the TextPaint idea
         float northIndicatorHeight = mTextPaint.getTextSize();
 
-        float northIndicatorWidth = mTextPaint.measureText( mNorthIndicatorText );
+        float northIndicatorWidth = getTextLength( mNorthIndicatorText, mTextPaint );
 
         float northIndicatorY =
-                ( viewQuarterHeight - outerRadius ) + // center it vertically on top of the outer circle
+                ( viewHalfHeight - outerRadius ) + // center it vertically on top of the outer circle
                 mRadiusDifference / 2 + // put its baseline halfway the distance from the outer circle to the inner circle
                 ( northIndicatorHeight / 2 ) // put its baseline below the halfway by half the text height
                 ; // thus putting the indicator right in the middle of the circle
 
         // 4c. should be on the middle of the circle
 
-        float northIndicatorX = viewQuarterWidth - northIndicatorWidth / 2.0f;
+        float northIndicatorX = circleCenterX - northIndicatorWidth / 2.0f;
 
         // 4d. should use the right color
 
@@ -694,7 +736,7 @@ public class WindDirectionAndSpeedView extends View {
         // 6. rotate the arrow as needed
 
         // http://stackoverflow.com/questions/6763231/draw-rotated-path-at-particular-point
-        mArrowPathRotationMatrix.postRotate( mArrowAngleToDraw, getTotalWidth() / 4, getTotalHeight() / 4 );
+        mArrowPathRotationMatrix.postRotate( mArrowAngleToDraw, circleCenterX, circleCenterY );
 
         mArrowPath.transform( mArrowPathRotationMatrix );
 
@@ -795,15 +837,15 @@ public class WindDirectionAndSpeedView extends View {
     private float getOriginY( float outerCircleRadius ) {
 
         // 0. if the height is larger
-        // 0a. origin is top padding + (total height)/4 - outer radius
+        // 0a. origin is top padding + (total height)/2 - outer radius
         // 1. otherwise
         // 1a. origin is top padding
 
         // 0. if the height is larger
-        // 0a. origin is top padding + (total height)/4 - outer radius
+        // 0a. origin is top padding + (total height)/2 - outer radius
 
         if ( isWidthLarger() == false /* so the height is the larger one */ ) {
-            return getPaddingTop() + getTotalHeight() / 4 - outerCircleRadius;
+            return getPaddingTop() + getTotalHeight() / 2 - outerCircleRadius;
         }
 
         // 1. otherwise
@@ -961,13 +1003,10 @@ public class WindDirectionAndSpeedView extends View {
 
         // 1. animate the translationX
 
-        Rect speedTextBoundsRect = new Rect();
-        mTextPaint.getTextBounds( mSpeedText, 0, mSpeedText.length(), speedTextBoundsRect );
-
-        mSpeedTextLeftXToDraw = mSpeedTextLeftX - speedTextBoundsRect.width();
+        mSpeedTextLeftXToDraw = mSpeedTextLeftX - getTextLength( mSpeedText, mTextPaint );
 
         animateSpeedTextTranslationX(
-                mSpeedTextLeftX - speedTextBoundsRect.width(), mSpeedTextLeftX
+                mSpeedTextLeftX - getTextLength( mSpeedText, mTextPaint ), mSpeedTextLeftX
         );
 
     } // end method animateSpeedText
@@ -1096,6 +1135,18 @@ public class WindDirectionAndSpeedView extends View {
         mSpeedTranslationXValueAnimator.start();
 
     } // end method animateSpeedTextTranslationX
+
+    /**
+     * Gets the length of a given piece of text
+     *
+     * @param text      The text to get the length of
+     * @param textPaint The {@link TextPaint} we will use to determine text length
+     *
+     * @return The length of the given text
+     * */
+    private float getTextLength( String text, TextPaint textPaint ) {
+        return textPaint.measureText( text );
+    }
 
     /* INNER CLASSES */
 

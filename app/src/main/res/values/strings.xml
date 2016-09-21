@@ -60,4 +60,8 @@
         <xliff:g id="speed">%1.0f</xliff:g> km/h
     </string>/string>
 
+    <!-- Mock text -->
+
+    <string name="mock_text">Some mock text</string>
+
 </resources>
