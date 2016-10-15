@@ -14,6 +14,7 @@ The code here draws a compass-like figure with an arrow pointing toward the wind
 
 * The custom view can show both wind direction and speed - indeed any direction and speed combo. 
 * Animation! :smile:
+* The custom does some spacing calculation.
 
 ## Limitations :worried:
 
@@ -25,11 +26,11 @@ The code here draws a compass-like figure with an arrow pointing toward the wind
 
 ## Possible Future Work :fast_forward:
 
-- [ ] Make spacing more efficient.
+- [x] Make spacing more efficient. Done in [this](https://github.com/joshua-kairu/custom-view/tree/61276209925eed41892272f02c8d736a17481e1e) commit.
 
 - [ ] Put a [TextView](https://developer.android.com/reference/android/widget/TextView.html) in the view so that we can style the speed text.
 
-- [ ] Change the compass arrow and border thicknesses.
+- [x] Change the compass arrow and border thicknesses. Done in [this](https://github.com/joshua-kairu/custom-view/tree/61276209925eed41892272f02c8d736a17481e1e) commit.
 
 ## Other things :books:
 
