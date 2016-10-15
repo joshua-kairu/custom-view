@@ -27,7 +27,7 @@ The code here draws a compass-like figure with an arrow pointing toward the wind
 
 - [ ] Make spacing more efficient.
 
-- [ ] Put a TextView in the view so that we can style the speed text.
+- [ ] Put a [TextView](https://developer.android.com/reference/android/widget/TextView.html) in the view so that we can style the speed text.
 
 - [ ] Change the compass arrow and border thicknesses.
 
@@ -37,11 +37,11 @@ I'd like to thank Envato Tutsplus for their tutorials. Very simple. Very direct.
 
 Some references that made this code possible are:
 
-* http://www.programcreek.com/java-api-examples/index.php?source_dir=andbase-master/AndBase/src/com/ab/util/AbGraphicUtil.java, which showed me the [TextPaint] class, which I used to determine the length of the speed text.
+* http://www.programcreek.com/java-api-examples/index.php?source_dir=andbase-master/AndBase/src/com/ab/util/AbGraphicUtil.java, which showed me the [TextPaint](https://developer.android.com/reference/android/text/TextPaint.html) class, which I used to determine the length of the speed text.
 
-* http://stackoverflow.com/questions/6763231/draw-rotated-path-at-particular-point, which told me how to rotate the [Path] that defines the compass arrow.
+* http://stackoverflow.com/questions/6763231/draw-rotated-path-at-particular-point, which told me how to rotate the [Path](https://developer.android.com/reference/android/graphics/Path.html) that defines the compass arrow.
 
-* http://android-er.blogspot.co.ke/2014/06/rotate-path-with-matrix.html, which told me how to reset the [Matrix] that defines the rotation of the compass arrow.
+* http://android-er.blogspot.co.ke/2014/06/rotate-path-with-matrix.html, which told me how to reset the [Matrix](https://developer.android.com/reference/android/graphics/Matrix.html) that defines the rotation of the compass arrow.
 
 ## License :lock_with_ink_pen:
 
