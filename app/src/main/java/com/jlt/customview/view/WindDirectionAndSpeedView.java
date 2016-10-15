@@ -28,10 +28,17 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Rect;
 import android.graphics.RectF;
+import android.os.Build;
+import android.support.v4.view.AccessibilityDelegateCompat;
+import android.support.v4.view.ViewCompat;
+import android.support.v4.view.accessibility.AccessibilityNodeInfoCompat;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 
 import com.jlt.customview.R;
 
@@ -55,8 +62,6 @@ public class WindDirectionAndSpeedView extends View {
 
     /** The default distance from the compass to the speed text in dp. */
     private static final int DEFAULT_SPEED_TEXT_LEFT_PADDING_DP = 8;
-
-    /* Strings */
 
     /** The largest possible speed text. Used to calculate minimum height and width. */
     public static final String LARGEST_SPEED_TEXT = "300 km/H"; // an assumption, of course.
@@ -97,8 +102,8 @@ public class WindDirectionAndSpeedView extends View {
     private int mSpeedTextAlphaToDraw; // ditto, used for animation
 
     private long mAnimationDurationToUse; // ditto, the actual animation time we will use.
-                                          // It ensures all items getting animated
-                                          // move at a constant speed.
+    // It ensures all items getting animated
+    // move at a constant speed.
 
     /* RectFs */
 
@@ -109,6 +114,8 @@ public class WindDirectionAndSpeedView extends View {
     private String mNorthIndicatorText; //ditto
 
     private String mSpeedText; // ditto
+
+    private String mWindDirectionAndSpeedTextForAccessibility; // ditto, for accessibility
 
     /* Text Paints */
 
@@ -127,6 +134,7 @@ public class WindDirectionAndSpeedView extends View {
 
         // 0. super stuff
         // 1. initialize things
+        // 2. put accessibility things in
 
         // 0. super stuff
 
@@ -136,10 +144,14 @@ public class WindDirectionAndSpeedView extends View {
 
         initView( context, attrs );
 
+        // 2. put accessibility things in
+
+        installAccessibilityDelegate();
+
     } // end default constructor for XML
 
     /* METHODS */
-    
+
     /* Getters and Setters */
 
     // getter for the outer circle color
@@ -219,7 +231,8 @@ public class WindDirectionAndSpeedView extends View {
         // 0b. if the new angle is greater than 360 then the member one should be within 360
         // 0c. otherwise everything is okay, the member angle should have the value of the new angle
         // 1. animate the new angle
-        // NB. no need to refresh the layout since the animation cares for that
+        // 2. send the accessibility event for arrow angle being changed
+        // last. refresh the layout
 
         // 0. take care of any invalid initialization
 
@@ -236,15 +249,24 @@ public class WindDirectionAndSpeedView extends View {
         else { mArrowAngle = newArrowAngle; }
 
         // 1. animate the new angle
-        
-        // we'll animate from 0 degrees to the arrow angle's degrees 
+
+        // we'll animate from 0 degrees to the arrow angle's degrees
         animateArrowRotation( 0, getArrowAngle() );
-        
-        // NB. no need to refresh the layout since the animation cares for that
+
+        // 2. send the accessibility event for arrow angle being changed
+
+        AccessibilityManager accessibilityManager =
+                ( AccessibilityManager ) getContext().getSystemService( Context.ACCESSIBILITY_SERVICE );
+
+        if ( accessibilityManager.isEnabled() == true ) {
+            sendAccessibilityEvent( AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED);
+        }
+
+        // last. refresh the layout
 
         invalidate();
         requestLayout();
-        
+
     } // end setter for the arrow angle
 
     // getter for the animation duration
@@ -316,20 +338,84 @@ public class WindDirectionAndSpeedView extends View {
         return mSpeedText;
     }
 
-    // setter for the speed text
+    // begin setter for the speed text
     public void setSpeedText( String speedText ) {
+
+        // 0. initialize the member variable
+        // 1. animate the text
+        // 2. send the accessibility event for arrow angle being changed
+        // last. refresh the layout
+
+        // 0. initialize the member variable
 
         this.mSpeedText = speedText;
 
+        // 1. animate the text
+
         animateSpeedText();
 
-        // refresh the layout
+        // 2. send the accessibility event for arrow angle being changed
+
+        AccessibilityManager accessibilityManager =
+                ( AccessibilityManager ) getContext().getSystemService( Context.ACCESSIBILITY_SERVICE );
+
+        if ( accessibilityManager.isEnabled() == true ) {
+            sendAccessibilityEvent( AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED );
+        }
+
+        // last. refresh the layout
+
         invalidate();
         requestLayout();
 
-    }
+    } // end setter for the speed text
 
     /* Overrides */
+
+    @Override
+    /**
+     * Measure the view and its content to determine the measured width and the measured height.
+     * */
+    // begin onMeasure
+    protected void onMeasure( int widthMeasureSpec, int heightMeasureSpec ) {
+
+        // 0. try for a width based on our minimum
+        // 1. whatever the width, ask for a height that would let the view get as big as possible
+        // 2. use the gotten width and height
+
+        // 0. try for a width based on our minimum
+
+        int minimumWidth = getPaddingLeft() + getPaddingRight() + getSuggestedMinimumWidth();
+
+        int widthToUse = -1;
+
+        if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB ) {
+            // reconcile a desired size and state, with constraints imposed by a MeasureSpec
+            widthToUse = resolveSizeAndState( minimumWidth, widthMeasureSpec, 1 );
+        }
+
+        else { widthToUse = minimumWidth; }
+
+        // 1. whatever the width, ask for a height that would let the view get as big as possible
+
+        // getSize - Extracts the size from the supplied measure specification.
+        int minimumHeight = getSuggestedMinimumWidth() + getPaddingBottom() + getPaddingTop();
+
+        int heightToUse = -1;
+
+        if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB ) {
+            heightToUse = resolveSizeAndState( getSuggestedMinimumWidth(), heightMeasureSpec, 0 );
+        }
+
+        else { heightToUse = minimumHeight; }
+
+        // 2. use the gotten width and height
+
+        // Must be called by onMeasure(int, int) to store the measured width and measured height.
+        // Failing to do so will trigger an exception at measurement time.
+        setMeasuredDimension( widthToUse, heightToUse );
+
+    } // end onMeasure
 
     /**
      * Returns the suggested minimum height that the view should use.
@@ -571,8 +657,8 @@ public class WindDirectionAndSpeedView extends View {
 
         float northIndicatorY =
                 ( viewHalfHeight - outerRadius ) + // center it vertically on top of the outer circle
-                mRadiusDifference / 2 + // put its baseline halfway the distance from the outer circle to the inner circle
-                ( northIndicatorHeight / 2 ) // put its baseline below the halfway by half the text height
+                        mRadiusDifference / 2 + // put its baseline halfway the distance from the outer circle to the inner circle
+                        ( northIndicatorHeight / 2 ) // put its baseline below the halfway by half the text height
                 ; // thus putting the indicator right in the middle of the circle
 
         // 4c. should be on the middle of the circle
@@ -597,13 +683,13 @@ public class WindDirectionAndSpeedView extends View {
 
         // 5a. draw point A facing the indicator
 
-        float aX = getOriginX( outerRadius ) + mRadiusDifference + innerRadius,
-              aY = getOriginY( outerRadius ) + mRadiusDifference + dpToPx( NORTH_INDICATOR_VERTICAL_PADDING_DP );
+        float aX = circleCenterX,
+                aY = circleCenterY - innerRadius;
 
         // 5b. draw point B to the left of A
 
-        float bX = getOriginX( outerRadius ) + mRadiusDifference + innerRadius - mRadiusDifference,
-              bY = getOriginY( outerRadius ) + mRadiusDifference + innerRadius + northIndicatorHeight;
+        float bX = circleCenterX - mRadiusDifference,
+                bY = circleCenterY + northIndicatorHeight;
 
         // 5c. draw point C to the right of A and B
 
@@ -652,6 +738,16 @@ public class WindDirectionAndSpeedView extends View {
         mArrowPathRotationMatrix.reset();
 
     } // end onDraw
+
+    /**
+     * Dispatches an AccessibilityEvent to the View first
+     * and then to its children for adding their text content to the event
+     * */
+    @Override
+    // dispatchPopulateAccessibilityEvent
+    public boolean dispatchPopulateAccessibilityEvent( AccessibilityEvent event ) {
+        event.getText().add( getWindDirectionAndSpeedText() ); return true;
+    }
 
     /* Other Methods */
 
@@ -735,15 +831,15 @@ public class WindDirectionAndSpeedView extends View {
     private float getOriginY( float outerCircleRadius ) {
 
         // 0. if the height is larger
-        // 0a. origin is top padding + (total height)/2 - outer radius
+        // 0a. origin is top padding + (total height)/4 - outer radius
         // 1. otherwise
         // 1a. origin is top padding
 
         // 0. if the height is larger
-        // 0a. origin is top padding + (total height)/2 - outer radius
+        // 0a. origin is top padding + (total height)/4 - outer radius
 
         if ( isWidthLarger() == false /* so the height is the larger one */ ) {
-            return getPaddingTop() + getTotalHeight() / 2 - outerCircleRadius;
+            return getPaddingTop() + getTotalHeight() / 4 - outerCircleRadius;
         }
 
         // 1. otherwise
@@ -782,9 +878,9 @@ public class WindDirectionAndSpeedView extends View {
         return this.getMeasuredHeight() + getPaddingTop() + getPaddingBottom();
     }
 
-    /** 
-     * Helper method to animate the rotation of the arrow. 
-     * 
+    /**
+     * Helper method to animate the rotation of the arrow.
+     *
      * @param previousAngle The angle to rotate from, in degrees.
      * @param targetAngle The angle to rotate to, in degrees.
      * */
@@ -800,52 +896,67 @@ public class WindDirectionAndSpeedView extends View {
         // 1c2. invalidate, thus redraw
         // 2. animate!
 
-        // 0. if there is an animation happening, stop it
+        // we'll animate only in compatible versions
 
-        if ( mArrowValueAnimator != null ) { mArrowValueAnimator.cancel(); }
+        // begin if we're on at least Honeycomb
+        if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB ) {
 
-        // 1. we are about to animate
+            // 0. if there is an animation happening, stop it
 
-        // 1a. animate from the previous angle to the target angle
+            if ( mArrowValueAnimator != null ) { mArrowValueAnimator.cancel(); }
 
-        mArrowValueAnimator = ValueAnimator.ofFloat( previousAngle, targetAngle );
+            // 1. we are about to animate
 
-        // 1b. for a time dependent on the start and end angles
+            // 1a. animate from the previous angle to the target angle
 
-        setAnimationDurationToUse( previousAngle, targetAngle, 360f );
+            mArrowValueAnimator = ValueAnimator.ofFloat( previousAngle, targetAngle );
 
-        mArrowValueAnimator.setDuration( getAnimationDurationToUse() );
+            // 1b. for a time dependent on the start and end angles
 
-        // 1c. and on every animation update
+            setAnimationDurationToUse( previousAngle, targetAngle, 360f );
 
-        // begin addUpdateListener
-        mArrowValueAnimator.addUpdateListener(
+            mArrowValueAnimator.setDuration( getAnimationDurationToUse() );
 
-                // begin new ValueAnimator.AnimatorUpdateListener
-                new ValueAnimator.AnimatorUpdateListener() {
+            // 1c. and on every animation update
 
-                    @Override
-                    // begin onAnimationUpdate
-                    public void onAnimationUpdate( ValueAnimator valueAnimator ) {
+            // begin addUpdateListener
+            mArrowValueAnimator.addUpdateListener(
 
-                        // 1c1. store the current value of the animation
-                        //      as the arrow angle we should draw
+                    // begin new ValueAnimator.AnimatorUpdateListener
+                    new ValueAnimator.AnimatorUpdateListener() {
 
-                        mArrowAngleToDraw = ( float ) valueAnimator.getAnimatedValue();
+                        @Override
+                        // begin onAnimationUpdate
+                        public void onAnimationUpdate( ValueAnimator valueAnimator ) {
 
-                        // 1c2. invalidate, thus redraw
+                            // begin if we're on at least Honeycomb
+                            if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB ) {
 
-                        WindDirectionAndSpeedView.this.invalidate();
+                                // 1c1. store the current value of the animation
+                                //      as the arrow angle we should draw
 
-                    } // end onAnimationUpdate
+                                mArrowAngleToDraw = ( float ) valueAnimator.getAnimatedValue();
 
-                } // end new ValueAnimator.AnimatorUpdateListener
+                                // 1c2. invalidate, thus redraw
 
-        ); // end addUpdateListener
+                                WindDirectionAndSpeedView.this.invalidate();
 
-        // 2. animate!
+                            } // end if we're on at least Honeycomb
 
-        mArrowValueAnimator.start();
+                        } // end onAnimationUpdate
+
+                    } // end new ValueAnimator.AnimatorUpdateListener
+
+            ); // end addUpdateListener
+
+            // 2. animate!
+
+            mArrowValueAnimator.start();
+
+        } // end if we're on at least Honeycomb
+
+        // otherwise just draw the final value of the arrow angle
+        else { mArrowAngleToDraw = mArrowAngle; invalidate(); }
 
     } // end method animateArrowRotation
 
@@ -901,10 +1012,13 @@ public class WindDirectionAndSpeedView extends View {
 
         // 1. animate the translationX
 
-        mSpeedTextLeftXToDraw = mSpeedTextLeftX - getTextLength( mSpeedText, mTextPaint );
+        Rect speedTextBoundsRect = new Rect();
+        mTextPaint.getTextBounds( mSpeedText, 0, mSpeedText.length(), speedTextBoundsRect );
+
+        mSpeedTextLeftXToDraw = mSpeedTextLeftX - speedTextBoundsRect.width();
 
         animateSpeedTextTranslationX(
-                mSpeedTextLeftX - getTextLength( mSpeedText, mTextPaint ), mSpeedTextLeftX
+                mSpeedTextLeftX - speedTextBoundsRect.width(), mSpeedTextLeftX
         );
 
     } // end method animateSpeedText
@@ -927,47 +1041,62 @@ public class WindDirectionAndSpeedView extends View {
         // 1c2. invalidate, thus redraw
         // 2. animate!
 
-        // 0. if there is an animation happening, stop it
+        // we'll animate only on compatible versions
 
-        if ( mSpeedAlphaValueAnimator != null ) { mSpeedAlphaValueAnimator.cancel(); }
+        // begin if we're on at least Honeycomb
+        if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB ) {
 
-        // 1. we are about to animate
-        // 1a. animate from the start alpha to the end alpha
-        // 1b. for a time dependent on the animation duration we should use
+            // 0. if there is an animation happening, stop it
 
-        mSpeedAlphaValueAnimator = ValueAnimator.ofInt( startAlpha, endAlpha )
-                .setDuration( getAnimationDurationToUse() );
+            if ( mSpeedAlphaValueAnimator != null ) { mSpeedAlphaValueAnimator.cancel(); }
 
-        // 1c. and on every animation update
+            // 1. we are about to animate
+            // 1a. animate from the start alpha to the end alpha
+            // 1b. for a time dependent on the animation duration we should use
 
-        // begin mSpeedAlphaValueAnimator.addUpdateListener
-        mSpeedAlphaValueAnimator.addUpdateListener(
+            mSpeedAlphaValueAnimator = ValueAnimator.ofInt( startAlpha, endAlpha )
+                    .setDuration( getAnimationDurationToUse() );
 
-                // begin new ValueAnimator.AnimatorUpdateListener
-                new ValueAnimator.AnimatorUpdateListener() {
+            // 1c. and on every animation update
 
-                    @Override
-                    // begin onAnimationUpdate
-                    public void onAnimationUpdate( ValueAnimator valueAnimator ) {
+            // begin mSpeedAlphaValueAnimator.addUpdateListener
+            mSpeedAlphaValueAnimator.addUpdateListener(
 
-                        // 1c1. store the current value of the animation
-                        // as the alpha value we should draw
+                    // begin new ValueAnimator.AnimatorUpdateListener
+                    new ValueAnimator.AnimatorUpdateListener() {
 
-                        mSpeedTextAlphaToDraw = ( int ) valueAnimator.getAnimatedValue();
+                        @Override
+                        // begin onAnimationUpdate
+                        public void onAnimationUpdate( ValueAnimator valueAnimator ) {
 
-                        // 1c2. invalidate, thus redraw
+                            // begin if we're on at least Honeycomb
+                            if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB ) {
 
-                        WindDirectionAndSpeedView.this.invalidate();
+                                // 1c1. store the current value of the animation
+                                // as the alpha value we should draw
 
-                    } // end onAnimationUpdate
+                                mSpeedTextAlphaToDraw = ( int ) valueAnimator.getAnimatedValue();
 
-                } // end new ValueAnimator.AnimatorUpdateListener
+                                // 1c2. invalidate, thus redraw
 
-        ); // end mSpeedAlphaValueAnimator.addUpdateListener
+                                WindDirectionAndSpeedView.this.invalidate();
 
-        // 2. animate!
+                            } // end if we're on at least Honeycomb
 
-        mSpeedAlphaValueAnimator.start();
+                        } // end onAnimationUpdate
+
+                    } // end new ValueAnimator.AnimatorUpdateListener
+
+            ); // end mSpeedAlphaValueAnimator.addUpdateListener
+
+            // 2. animate!
+
+            mSpeedAlphaValueAnimator.start();
+
+        } // end if we're on at least Honeycomb
+
+        // otherwise just use the final value of the alpha
+        else { mSpeedTextAlphaToDraw = 255; invalidate(); }
 
     } // end method animateSpeedTextAlpha
 
@@ -989,48 +1118,61 @@ public class WindDirectionAndSpeedView extends View {
         // 1c2. invalidate, thus redraw
         // 2. animate!
 
-        // 0. if there is an animation happening, stop it
+        // begin if we're on at least Honeycomb
+        if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB ) {
 
-        if ( mSpeedTranslationXValueAnimator != null ) { mSpeedTranslationXValueAnimator.cancel(); }
+            // 0. if there is an animation happening, stop it
 
-        // 1. we are about to animate
-        // 1a. animate from the start translationX to the end translationX
-        // 1b. for a time dependent on the animation duration we should use
+            if ( mSpeedTranslationXValueAnimator != null ) { mSpeedTranslationXValueAnimator.cancel(); }
 
-        mSpeedTranslationXValueAnimator =
-                ValueAnimator.ofFloat( startTranslationX, endTranslationX )
-                .setDuration( getAnimationDurationToUse() );
+            // 1. we are about to animate
+            // 1a. animate from the start translationX to the end translationX
+            // 1b. for a time dependent on the animation duration we should use
 
-        // 1c. and on every animation update
+            mSpeedTranslationXValueAnimator =
+                    ValueAnimator.ofFloat( startTranslationX, endTranslationX )
+                            .setDuration( getAnimationDurationToUse() );
 
-        // begin mSpeedTranslationXValueAnimator.addUpdateListener
-        mSpeedTranslationXValueAnimator.addUpdateListener(
+            // 1c. and on every animation update
 
-                // begin new ValueAnimator.AnimatorUpdateListener
-                new ValueAnimator.AnimatorUpdateListener() {
+            // begin mSpeedTranslationXValueAnimator.addUpdateListener
+            mSpeedTranslationXValueAnimator.addUpdateListener(
 
-                    @Override
-                    // begin onAnimationUpdate
-                    public void onAnimationUpdate( ValueAnimator valueAnimator ) {
+                    // begin new ValueAnimator.AnimatorUpdateListener
+                    new ValueAnimator.AnimatorUpdateListener() {
 
-                        // 1c1. store the current value of the animation
-                        // as the translationX value we should draw
+                        @Override
+                        // begin onAnimationUpdate
+                        public void onAnimationUpdate( ValueAnimator valueAnimator ) {
 
-                        mSpeedTextLeftXToDraw = ( float ) valueAnimator.getAnimatedValue();
+                            // begin if we're on at least Honeycomb
+                            if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB ) {
 
-                        // 1c2. invalidate, thus redraw
+                                // 1c1. store the current value of the animation
+                                // as the translationX value we should draw
 
-                        WindDirectionAndSpeedView.this.invalidate();
+                                mSpeedTextLeftXToDraw = ( float ) valueAnimator.getAnimatedValue();
 
-                    } // end onAnimationUpdate
+                                // 1c2. invalidate, thus redraw
 
-                } // end new ValueAnimator.AnimatorUpdateListener
+                                WindDirectionAndSpeedView.this.invalidate();
 
-        ); // end mSpeedTranslationXValueAnimator.addUpdateListener
+                            } // end if we're on at least Honeycomb
 
-        // 2. animate!
+                        } // end onAnimationUpdate
 
-        mSpeedTranslationXValueAnimator.start();
+                    } // end new ValueAnimator.AnimatorUpdateListener
+
+            ); // end mSpeedTranslationXValueAnimator.addUpdateListener
+
+            // 2. animate!
+
+            mSpeedTranslationXValueAnimator.start();
+
+        } // end if we're on at least Honeycomb
+
+        // otherwise just draw the final translationX
+        else { mSpeedTextLeftXToDraw = mSpeedTextLeftX; invalidate(); }
 
     } // end method animateSpeedTextTranslationX
 
@@ -1059,7 +1201,10 @@ public class WindDirectionAndSpeedView extends View {
         // 1. initialize member variables from the XML
         // 2. initialize the animation duration we will use to be the smallest possible
         // since we are just starting
-
+        // 3. make the view focusable for accessibility by making it
+        // 3a. focusable
+        // 3b. focusable in touch mode
+        // 3c. clickable
 
         // 0. initialize things
 
@@ -1112,8 +1257,8 @@ public class WindDirectionAndSpeedView extends View {
                     getResources().getColor( android.R.color.white )
             );
 
-            mRadiusDifference = a.getFloat( R.styleable.WindDirectionAndSpeedView_radiusDifference,
-                    dpToPx( DEFAULT_RADIUS_DIFFERENCE_DP )
+            mRadiusDifference = a.getDimension( R.styleable.WindDirectionAndSpeedView_radiusDifference,
+                    DEFAULT_RADIUS_DIFFERENCE_DP
             );
 
             mNorthIndicatorText = a.getString( R.styleable.WindDirectionAndSpeedView_northIndicatorText );
@@ -1159,7 +1304,97 @@ public class WindDirectionAndSpeedView extends View {
 
         setAnimationDurationToUse( -1, -1, -1 );
 
+        // 3. make the view focusable for accessibility by making it
+
+        // 3a. focusable
+
+        // Set whether this view can receive the focus.
+        setFocusable( true );
+
+        // 3b. focusable in touch mode
+
+        // Set whether this view can receive focus while in touch mode.
+        setFocusableInTouchMode( true );
+
+        // 3c. clickable
+
+        // Enables or disables click events for this view.
+        // Visually reacts to user's clicks.
+        setClickable( true );
+
     } // end method initView
+
+    /** Installs the accessibility delegate into this view. */
+    // begin method installAccessibilityDelegate
+    private void installAccessibilityDelegate() {
+
+        // begin ViewCompat.setAccessibilityDelegate
+        ViewCompat.setAccessibilityDelegate(
+
+                this,
+
+                // begin new AccessibilityDelegateCompat
+                new AccessibilityDelegateCompat() {
+
+                    @Override
+                    /**
+                     * Gives a chance to the host View to
+                     * populate the accessibility event with its text content
+                     * */
+                    // begin onPopulateAccessibilityEvent
+                    public void onPopulateAccessibilityEvent( View host, AccessibilityEvent event ) {
+
+                        // 0. super stuff
+                        // 1. add the direction and speed text
+
+                        // 0. super stuff
+
+                        super.onPopulateAccessibilityEvent( host, event );
+
+                        // 1. add the direction and speed text
+
+                        event.getText().add( getWindDirectionAndSpeedText() );
+
+                    } // end onPopulateAccessibilityEvent
+
+                    @Override
+                    /**
+                     * Initializes an AccessibilityNodeInfoCompat( representing node of the window
+                     * content as well as actions that can be requested from its source) with
+                     * information about the host view.
+                     * */
+                    // begin onInitializeAccessibilityNodeInfo
+                    public void onInitializeAccessibilityNodeInfo( View host,
+                                                                   AccessibilityNodeInfoCompat info ) {
+
+                        // 0. super stuff
+                        // 1. put the direction and speed text in the node info
+
+                        // 0. super stuff
+
+                        super.onInitializeAccessibilityNodeInfo( host, info );
+
+                        // 1. put the direction and speed text in the node info
+
+                        info.setText( getWindDirectionAndSpeedText() );
+
+                    } // end onInitializeAccessibilityNodeInfo
+
+                } // end new AccessibilityDelegateCompat
+
+        ); // end ViewCompat.setAccessibilityDelegate
+
+    } // begin method installAccessibilityDelegate
+
+    // getter for the wind direction and speed text for accessibility
+    public String getWindDirectionAndSpeedText() {
+        return mWindDirectionAndSpeedTextForAccessibility;
+    }
+
+    // setter for the wind direction and speed text for accessibility
+    public void setWindDirectionAndSpeedTextForAccessibility( String windDirectionAndSpeedTextForAccessibility ) {
+        this.mWindDirectionAndSpeedTextForAccessibility = windDirectionAndSpeedTextForAccessibility;
+    }
 
     /* INNER CLASSES */
 

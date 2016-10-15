@@ -56,11 +56,14 @@ public class MainActivity extends AppCompatActivity {
 
     /* Primitives */
 
+    private boolean mIsMetric; // ditto
+
     private float mWindDirectionDegrees; // ditto
+    private float mWindSpeedFloat; // ditto
 
     /* Strings */
 
-    private String mWindSpeed; // ditto
+    private String mWindSpeedString; // ditto
 
     /* My Views */
 
@@ -118,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
 
         binding.amWdasvWindSpeedAndDirection.setArrowAngle( mWindDirectionDegrees );
 
-        binding.amWdasvWindSpeedAndDirection.setSpeedText( mWindSpeed );
+        binding.amWdasvWindSpeedAndDirection.setSpeedText( mWindSpeedString );
 
         // 1b. display text view
 
@@ -197,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
 
         } // end else we are not on metric
 
-        mWindSpeed = getString( windFormatWithoutDirection, windSpeed );
+        mWindSpeedString = getString( windFormatWithoutDirection, windSpeed );
 
         // 1. determine the readable wind direction based on the wind direction degrees
 
@@ -226,6 +229,57 @@ public class MainActivity extends AppCompatActivity {
         return String.format( Locale.ENGLISH, getString( windFormat ), windSpeed, direction );
 
     } // end method getFormattedWind
+
+    /** Formats the wind direction and speed in a way friendly to the user. */
+    // begin method getFormattedWindDirectionAndSpeed
+    private String getFormattedWindDirectionAndSpeed( boolean isMetric, float windDirectionDegrees,
+                                                      float windSpeed ) {
+
+        // 0. determine the readable wind direction based on the wind direction degrees
+        // 1. format the wind speed based on preferred units
+        // 2. return the formatted wind text
+
+        // 0. determine the readable wind direction based on the wind direction degrees
+
+        String direction = "Unknown";
+
+        if ( windDirectionDegrees >= 337.5 || windDirectionDegrees < 22.5 ) { direction = "N"; }
+
+        else if ( windDirectionDegrees >= 22.5 && windDirectionDegrees < 67.5 ) { direction = "NE"; }
+
+        else if ( windDirectionDegrees >= 67.5 && windDirectionDegrees < 112.5 ) { direction = "E"; }
+
+        else if ( windDirectionDegrees >= 112.5 && windDirectionDegrees < 157.5 ) { direction = "SE"; }
+
+        else if ( windDirectionDegrees >= 157.5 && windDirectionDegrees < 202.5 ) { direction = "S"; }
+
+        else if ( windDirectionDegrees >= 202.5 && windDirectionDegrees < 247.5 ) { direction = "SW"; }
+
+        else if ( windDirectionDegrees >= 247.5 && windDirectionDegrees < 292.5 ) { direction = "W"; }
+
+        else if ( windDirectionDegrees >= 292.5 && windDirectionDegrees < 337.5 ) { direction = "NW"; }
+
+        // 1. format the wind speed based on preferred units
+
+        int windFormat = -1;
+
+        if ( isMetric == true ) {
+            windFormat = R.string.format_wind_direction_speed_kmh;
+        }
+
+        // begin else we are not on metric
+        else {
+
+            windFormat = R.string.format_wind_direction_speed_mph;
+            windSpeed = .621371192237334f * windSpeed; // convert the wind speed from kmh to mph
+
+        } // end else we are not on metric
+
+        // 2. return the formatted wind text
+
+        return getString( windFormat, direction, windSpeed );
+
+    } // end method getFormattedWindDirectionAndSpeed
 
     /* INNER CLASSES */
 

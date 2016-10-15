@@ -71,8 +71,6 @@
 
                 style="@style/TextAppearance.AppCompat.Display1"
 
-                tools:text="@string/mock_text"
-
                 android:layout_centerHorizontal="true"
 
                 android:gravity="center_horizontal"
@@ -81,177 +79,13 @@
 
                 />
 
-            <LinearLayout
-
-                android:layout_width="wrap_content"
-
-                android:layout_height="wrap_content"
-
-                android:layout_centerHorizontal="true"
-
-                android:gravity="center_horizontal"
-
-                android:layout_below="@id/am_tv_display"
-
-                android:orientation="vertical"
-
-                android:id="@+id/am_ll_content"
-
-                >
-
-                <TextView
-
-                    android:layout_width="wrap_content"
-
-                    android:layout_height="wrap_content"
-
-                    style="@style/TextAppearance.AppCompat.Display1"
-
-                    android:text="@string/mock_text"
-
-                    android:gravity="center_horizontal"
-
-                    android:paddingBottom="@dimen/text_baseline"
-
-                    />
-
-                <TextView
-
-                    android:layout_width="wrap_content"
-
-                    android:layout_height="wrap_content"
-
-                    style="@style/TextAppearance.AppCompat.Display1"
-
-                    android:text="@string/mock_text"
-
-                    android:gravity="center_horizontal"
-
-                    android:paddingBottom="@dimen/text_baseline"
-
-                    />
-
-                <TextView
-
-                    android:layout_width="wrap_content"
-
-                    android:layout_height="wrap_content"
-
-                    style="@style/TextAppearance.AppCompat.Display1"
-
-                    android:text="@string/mock_text"
-
-                    android:gravity="center_horizontal"
-
-                    android:paddingBottom="@dimen/text_baseline"
-
-                    />
-
-                <TextView
-
-                    android:layout_width="wrap_content"
-
-                    android:layout_height="wrap_content"
-
-                    style="@style/TextAppearance.AppCompat.Display1"
-
-                    android:text="@string/mock_text"
-
-                    android:gravity="center_horizontal"
-
-                    android:paddingBottom="@dimen/text_baseline"
-
-                    />
-
-                <TextView
-
-                    android:layout_width="wrap_content"
-
-                    android:layout_height="wrap_content"
-
-                    style="@style/TextAppearance.AppCompat.Display1"
-
-                    android:text="@string/mock_text"
-
-                    android:gravity="center_horizontal"
-
-                    android:paddingBottom="@dimen/text_baseline"
-
-                    />
-
-                <TextView
-
-                    android:layout_width="wrap_content"
-
-                    android:layout_height="wrap_content"
-
-                    style="@style/TextAppearance.AppCompat.Display1"
-
-                    android:text="@string/mock_text"
-
-                    android:gravity="center_horizontal"
-
-                    android:paddingBottom="@dimen/text_baseline"
-
-                    />
-
-                <TextView
-
-                    android:layout_width="wrap_content"
-
-                    android:layout_height="wrap_content"
-
-                    style="@style/TextAppearance.AppCompat.Display1"
-
-                    android:text="@string/mock_text"
-
-                    android:gravity="center_horizontal"
-
-                    android:paddingBottom="@dimen/text_baseline"
-
-                    />
-
-                <TextView
-
-                    android:layout_width="wrap_content"
-
-                    android:layout_height="wrap_content"
-
-                    style="@style/TextAppearance.AppCompat.Display1"
-
-                    android:text="@string/mock_text"
-
-                    android:gravity="center_horizontal"
-
-                    android:paddingBottom="@dimen/text_baseline"
-
-                    />
-
-                <TextView
-
-                    android:layout_width="wrap_content"
-
-                    android:layout_height="wrap_content"
-
-                    style="@style/TextAppearance.AppCompat.Display1"
-
-                    android:text="@string/mock_text"
-
-                    android:gravity="center_horizontal"
-
-                    android:paddingBottom="@dimen/text_baseline"
-
-                    />
-
-            </LinearLayout>
-
             <!-- the custom view -->
 
             <com.jlt.customview.view.WindDirectionAndSpeedView
 
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
 
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
 
                 android:id="@+id/am_wdasv_wind_speed_and_direction"
 
@@ -259,9 +93,11 @@
 
                 custom:northIndicatorColor="@android:color/black"
 
+                custom:radiusDifference="4dp"
+
                 android:layout_centerHorizontal="true"
 
-                android:layout_below="@id/am_ll_content"
+                android:layout_below="@id/am_tv_display"
 
                 />
 

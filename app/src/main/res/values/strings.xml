@@ -60,8 +60,14 @@
         <xliff:g id="speed">%1.0f</xliff:g> km/h
     </string>/string>
 
-    <!-- Mock text -->
+    <!-- Wind direction and speed in km/h -->
+    <string name="format_wind_direction_speed_kmh">
+        Wind: <xliff:g id="direction">%1$s</xliff:g> <xliff:g id="speed">%2$1.0f</xliff:g> km/h
+    </string>/string>
 
-    <string name="mock_text">Some mock text</string>
+    <!-- Wind direction and speed in mph -->
+    <string name="format_wind_direction_speed_mph">
+        Wind: <xliff:g id="direction">%1$s</xliff:g> <xliff:g id="speed">%2$1.0f</xliff:g> mph
+    </string>/string>
 
 </resources>
